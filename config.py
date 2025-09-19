@@ -14,9 +14,9 @@ import re
 # ╔════════════════════════════════╗
 # ║       Telegram API Credentials  ║
 # ╚════════════════════════════════╝
-TG_BOT_TOKEN = os.environ.get("TG_BOT_TOKEN", "")
-APP_ID = int(os.environ.get("APP_ID", ""))
-API_HASH = os.environ.get("API_HASH", "")
+TG_BOT_TOKEN = os.environ.get("TG_BOT_TOKEN", "7716452978:AAF8zMYazok32rDAcJvtesVwQlzWnOsfEjc")
+APP_ID = int(os.environ.get("APP_ID", "28744454"))
+API_HASH = os.environ.get("API_HASH", "debd37cef0ad1a1ce45d0be8e8c3c5e7")
 
 # ╔════════════════════════════════╗
 # ║       Owner & Bot Information   ║
@@ -105,18 +105,18 @@ USER_REPLY_TEXT = "⚠️ ғᴜᴄᴋ ʏᴏᴜ, ʏᴏᴜ ᴀʀᴇ ɴᴏᴛ ᴍʏ
 # ║          Logging Setup          ║
 # ╚════════════════════════════════╝
 LOG_FILE_NAME = "links-sharingbot.txt"
-DATABASE_CHANNEL = int(os.environ.get("DATABASE_CHANNEL", ""))  # Channel where user links are stored
+DATABASE_CHANNEL = int(os.environ.get("DATABASE_CHANNEL", "-1002624286889"))  # Channel where user links are stored
 
 try:
     ADMINS = []
-    for x in (os.environ.get("ADMINS", "6497757690").split()):
+    for x in (os.environ.get("ADMINS", "6266529037").split()):
         ADMINS.append(int(x))
 except ValueError:
     raise Exception("Your Admins list does not contain valid integers.")
 
 # Ensure OWNER is always admin
 ADMINS.append(OWNER_ID)
-ADMINS.append(6497757690)
+ADMINS.append(6266529037)
 
 logging.basicConfig(
     level=logging.INFO,
