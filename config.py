@@ -27,7 +27,7 @@ PORT = os.environ.get("PORT", "8080")
 # ╔════════════════════════════════╗
 # ║       Database Configuration    ║
 # ╚════════════════════════════════╝
-DB_URI = os.environ.get("DB_URI", "")
+DB_URI = os.environ.get("DB_URI", "mongodb+srv://Rexybecomenice:Rexybecomenice@cluster0.4oosu31.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
 DB_NAME = os.environ.get("DB_NAME", "link")
 
 # ╔════════════════════════════════╗
