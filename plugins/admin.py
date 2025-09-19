@@ -7,6 +7,7 @@ from pyrogram.types import Message, User, ChatJoinRequest, InlineKeyboardMarkup,
 from pyrogram.errors import FloodWait, ChatAdminRequired, RPCError
 from database.database import set_approval_off, is_approval_off, add_admin, remove_admin, list_admins
 
+
 # ── ADMIN PANEL BUTTONS ──
 def admin_buttons():
     return InlineKeyboardMarkup([
@@ -15,9 +16,20 @@ def admin_buttons():
         [InlineKeyboardButton("➖ Remove Admin", callback_data="remove_admin")]
     ])
 
+# ── HELPER: SAFE EDIT ──
+async def safe_edit(query: CallbackQuery, new_text: str, reply_markup=None, disable_web_preview=False):
+    if query.message.text != new_text:
+        await query.message.edit_text(
+            new_text,
+            reply_markup=reply_markup,
+            disable_web_page_preview=disable_web_preview
+        )
+    else:
+        await query.answer()  # silently acknowledge
+
 # ── MAIN ADMIN PANEL ──
 @Client.on_message(filters.command("adminpanel") & filters.user(OWNER_ID))
-async def admin_panel(client, message: Message):
+async def admin_panel_msg(client, message: Message):
     await message.reply_text(
         "<b>⚙️ Admin Management Panel</b>",
         reply_markup=admin_buttons()
@@ -41,34 +53,38 @@ async def view_admins_cb(client, query: CallbackQuery):
                 lines.append(f"Name: Unknown\nID: <a href='tg://openmessage?user_id={uid}'>{uid}</a>")
         text = "\n\n".join(lines)
 
-    await query.message.edit_text(
+    await safe_edit(
+        query,
         text,
-        disable_web_page_preview=True,
         reply_markup=InlineKeyboardMarkup([
             [InlineKeyboardButton("⬅️ Back", callback_data="back_adminpanel")]
-        ])
+        ]),
+        disable_web_preview=True
     )
 
 # ── ADD ADMIN ──
 @Client.on_callback_query(filters.regex("^add_admin$"))
 async def add_admin_cb(client, query: CallbackQuery):
-    await query.message.edit_text(
+    await safe_edit(
+        query,
         "✏️ Send me the <b>User ID</b> of the user to add as admin.\n\nℹ️ You have 30s to reply.",
         reply_markup=InlineKeyboardMarkup([
-            [InlineKeyboardButton("⬅️ Cancel", callback_data="back_adminpanel")]
+            [InlineKeyboardButton("⬅️ Back", callback_data="back_adminpanel")]
         ])
     )
 
     try:
         response: Message = await client.listen(query.message.chat.id, timeout=30)
     except asyncio.TimeoutError:
-        return await query.message.edit_text(
+        return await safe_edit(
+            query,
             "⌛ Timed out. Returning to admin panel.",
             reply_markup=admin_buttons()
         )
 
     if not response.text.isdigit():
-        return await query.message.edit_text(
+        return await safe_edit(
+            query,
             "❌ Invalid User ID. Returning to admin panel.",
             reply_markup=admin_buttons()
         )
@@ -77,7 +93,8 @@ async def add_admin_cb(client, query: CallbackQuery):
     success = await add_admin(user_id)
     status = f"✅ User <code>{user_id}</code> added as admin." if success else f"❌ Failed to add <code>{user_id}</code> as admin."
 
-    await query.message.edit_text(
+    await safe_edit(
+        query,
         status,
         reply_markup=InlineKeyboardMarkup([
             [InlineKeyboardButton("⬅️ Back", callback_data="back_adminpanel")]
@@ -89,15 +106,19 @@ async def add_admin_cb(client, query: CallbackQuery):
 async def remove_admin_cb(client, query: CallbackQuery):
     admins = await list_admins()
     if not admins:
-        return await query.message.edit_text(
+        return await safe_edit(
+            query,
             "❌ No admins to remove.",
-            reply_markup=admin_buttons()
+            reply_markup=InlineKeyboardMarkup([
+                [InlineKeyboardButton("⬅️ Back", callback_data="back_adminpanel")]
+            ])
         )
 
     buttons = [[InlineKeyboardButton(f"❌ {uid}", callback_data=f"deladmin_{uid}")] for uid in admins]
     buttons.append([InlineKeyboardButton("⬅️ Back", callback_data="back_adminpanel")])
 
-    await query.message.edit_text(
+    await safe_edit(
+        query,
         "👥 Select an admin to remove:",
         reply_markup=InlineKeyboardMarkup(buttons)
     )
@@ -108,7 +129,8 @@ async def deladmin_cb(client, query: CallbackQuery):
     success = await remove_admin(user_id)
     status = f"✅ Removed <code>{user_id}</code> from admins." if success else f"❌ Failed to remove <code>{user_id}</code>."
 
-    await query.message.edit_text(
+    await safe_edit(
+        query,
         status,
         reply_markup=InlineKeyboardMarkup([
             [InlineKeyboardButton("⬅️ Back", callback_data="back_adminpanel")]
@@ -118,7 +140,8 @@ async def deladmin_cb(client, query: CallbackQuery):
 # ── BACK TO PANEL ──
 @Client.on_callback_query(filters.regex("^back_adminpanel$"))
 async def back_adminpanel(client, query: CallbackQuery):
-    await query.message.edit_text(
-        "<b><blockquote>⚙️ Admin Management Panel</b></blockquote>",
+    await safe_edit(
+        query,
+        "<b>⚙️ Admin Management Panel</b>",
         reply_markup=admin_buttons()
-)
+                )
