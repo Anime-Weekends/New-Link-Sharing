@@ -21,7 +21,7 @@ API_HASH = os.environ.get("API_HASH", "debd37cef0ad1a1ce45d0be8e8c3c5e7")
 # ╔════════════════════════════════╗
 # ║       Owner & Bot Information   ║
 # ╚════════════════════════════════╝
-OWNER_ID = int(os.environ.get("OWNER_ID", "6497757690"))
+OWNER_ID = int(os.environ.get("OWNER_ID", "6266529037"))
 PORT = os.environ.get("PORT", "8080")
 
 # ╔════════════════════════════════╗
@@ -52,7 +52,7 @@ TG_BOT_WORKERS = int(os.environ.get("TG_BOT_WORKERS", "40"))
 # ╔════════════════════════════════╗
 # ║        Start & Help Messages    ║
 # ╚════════════════════════════════╝
-START_PIC_FILE_ID = "https://telegra.ph/file/f3d3aff9ec422158feb05-d2180e3665e0ac4d32.jpg"
+START_PIC_FILE_ID = "https://i.ibb.co/kNm80v1/photo-2025-08-12-19-47-36-7537788116967358496.jpg"
 START_IMG = START_PIC_FILE_ID
 START_MSG = os.environ.get(
     "START_MESSAGE",
@@ -109,14 +109,14 @@ DATABASE_CHANNEL = int(os.environ.get("DATABASE_CHANNEL", "-1002624286889"))  # 
 
 try:
     ADMINS = []
-    for x in (os.environ.get("ADMINS", "6497757690 6266529037").split()):
+    for x in (os.environ.get("ADMINS", "6266529037").split()):
         ADMINS.append(int(x))
 except ValueError:
     raise Exception("Your Admins list does not contain valid integers.")
 
 # Ensure OWNER is always admin
 ADMINS.append(OWNER_ID)
-ADMINS.append(6497757690)
+ADMINS.append(6266529037)
 
 logging.basicConfig(
     level=logging.INFO,
