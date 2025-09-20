@@ -1,4 +1,3 @@
-import os
 import asyncio
 from config import *
 from pyrogram import Client, filters
@@ -19,22 +18,31 @@ def main_panel_buttons():
 def extra_panel_buttons():
     return InlineKeyboardMarkup([
         [InlineKeyboardButton("👥 Admin List", callback_data="view_admins")],
-        [InlineKeyboardButton("⬅️", callback_data="back_adminpanel"),
-         InlineKeyboardButton("❌ Close", callback_data="close_adminpanel"),
-         InlineKeyboardButton("➡️", callback_data="extra_panel")]
+        [InlineKeyboardButton("⬅️ Back", callback_data="main_panel"),
+         InlineKeyboardButton("❌ Close", callback_data="close_adminpanel")]
+    ])
+
+def back_close_buttons(back_cb="back_adminpanel"):
+    return InlineKeyboardMarkup([
+        [InlineKeyboardButton("⬅️ Back", callback_data=back_cb),
+         InlineKeyboardButton("❌ Close", callback_data="close_adminpanel")]
     ])
 
 
 # ── SAFE EDIT ──
-async def safe_edit(query: CallbackQuery, new_text: str, reply_markup=None, disable_web_preview=False):
-    if query.message.text != new_text:
-        await query.message.edit_text(
-            new_text,
-            reply_markup=reply_markup,
-            disable_web_page_preview=disable_web_preview
-        )
-    else:
-        await query.answer()  # silently acknowledge
+async def safe_edit(query: CallbackQuery, new_text: str, reply_markup=None, disable_web_preview=True):
+    """Safely edit messages to avoid 'message not modified' error"""
+    try:
+        if query.message.text != new_text:
+            await query.message.edit_text(
+                new_text,
+                reply_markup=reply_markup,
+                disable_web_page_preview=disable_web_preview
+            )
+        else:
+            await query.answer()
+    except Exception:
+        await query.answer("⚠️ Update failed.", show_alert=True)
 
 
 # ── MAIN ADMIN PANEL ──
@@ -46,13 +54,23 @@ async def admin_panel_msg(client, message: Message):
     )
 
 
-# ── EXTRA PANEL (➡️) ──
+# ── SWITCH TO EXTRA PANEL ──
 @Client.on_callback_query(filters.regex("^extra_panel$"))
 async def extra_panel_cb(client, query: CallbackQuery):
     await safe_edit(
         query,
         "📋 <b>Extra Options</b>",
         reply_markup=extra_panel_buttons()
+    )
+
+
+# ── BACK TO MAIN PANEL ──
+@Client.on_callback_query(filters.regex("^main_panel$|^back_adminpanel$"))
+async def back_adminpanel(client, query: CallbackQuery):
+    await safe_edit(
+        query,
+        "<b>⚙️ Admin Management Panel</b>",
+        reply_markup=main_panel_buttons()
     )
 
 
@@ -68,18 +86,17 @@ async def view_admins_cb(client, query: CallbackQuery):
             try:
                 user = await client.get_users(uid)
                 name = f"{user.first_name or ''} {user.last_name or ''}".strip()
-                clickable_id = f"<a href='tg://openmessage?user_id={uid}'>{uid}</a>"
                 username = f"@{user.username}" if user.username else "—"
+                clickable_id = f"<a href='tg://openmessage?user_id={uid}'>{uid}</a>"
                 lines.append(f"👤 <b>{name}</b>\n🆔 {clickable_id}\n🌐 {username}")
             except Exception:
                 lines.append(f"👤 Unknown\n🆔 <a href='tg://openmessage?user_id={uid}'>{uid}</a>\n🌐 —")
-        text = "👥 <b>Admin List:</b>\n\n" + "\n\n".join(lines)
+        text = "👥 <b>Admin List</b>\n\n" + "\n\n".join(lines)
 
     await safe_edit(
         query,
         text,
-        reply_markup=extra_panel_buttons(),
-        disable_web_preview=True
+        reply_markup=back_close_buttons("extra_panel")
     )
 
 
@@ -88,8 +105,8 @@ async def view_admins_cb(client, query: CallbackQuery):
 async def add_admin_cb(client, query: CallbackQuery):
     await safe_edit(
         query,
-        "✏️ Send me the <b>User ID</b> of the user to add as admin.\n\nℹ️ You have 30s to reply.",
-        reply_markup=main_panel_buttons()
+        "✏️ Send me the <b>User ID</b> of the user to add as admin.\n\n⌛ 30s timeout.",
+        reply_markup=back_close_buttons()
     )
 
     try:
@@ -112,11 +129,7 @@ async def add_admin_cb(client, query: CallbackQuery):
     success = await add_admin(user_id)
     status = f"✅ User <code>{user_id}</code> added as admin." if success else f"❌ Failed to add <code>{user_id}</code> as admin."
 
-    await safe_edit(
-        query,
-        status,
-        reply_markup=main_panel_buttons()
-    )
+    await safe_edit(query, status, reply_markup=back_close_buttons())
 
 
 # ── REMOVE ADMIN ──
@@ -127,13 +140,17 @@ async def remove_admin_cb(client, query: CallbackQuery):
         return await safe_edit(
             query,
             "❌ No admins to remove.",
-            reply_markup=main_panel_buttons()
+            reply_markup=back_close_buttons()
         )
 
-    buttons = [[InlineKeyboardButton(f"❌ {uid}", callback_data=f"deladmin_{uid}")] for uid in admins]
-    buttons.append([InlineKeyboardButton("⬅️", callback_data="back_adminpanel"),
-                    InlineKeyboardButton("❌ Close", callback_data="close_adminpanel"),
-                    InlineKeyboardButton("➡️", callback_data="extra_panel")])
+    buttons = [
+        [InlineKeyboardButton(f"❌ {uid}", callback_data=f"deladmin_{uid}")]
+        for uid in admins
+    ]
+    buttons.append([
+        InlineKeyboardButton("⬅️ Back", callback_data="back_adminpanel"),
+        InlineKeyboardButton("❌ Close", callback_data="close_adminpanel")
+    ])
 
     await safe_edit(
         query,
@@ -148,21 +165,7 @@ async def deladmin_cb(client, query: CallbackQuery):
     success = await remove_admin(user_id)
     status = f"✅ Removed <code>{user_id}</code> from admins." if success else f"❌ Failed to remove <code>{user_id}</code>."
 
-    await safe_edit(
-        query,
-        status,
-        reply_markup=main_panel_buttons()
-    )
-
-
-# ── BACK TO MAIN PANEL ──
-@Client.on_callback_query(filters.regex("^back_adminpanel$"))
-async def back_adminpanel(client, query: CallbackQuery):
-    await safe_edit(
-        query,
-        "<b>⚙️ Admin Management Panel</b>",
-        reply_markup=main_panel_buttons()
-    )
+    await safe_edit(query, status, reply_markup=back_close_buttons())
 
 
 # ── CLOSE PANEL ──
@@ -172,4 +175,3 @@ async def close_adminpanel(client, query: CallbackQuery):
         await query.message.delete()
     except:
         await query.answer("❌ Can't close this panel.", show_alert=True)
-
