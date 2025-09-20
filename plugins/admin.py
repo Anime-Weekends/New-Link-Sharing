@@ -18,8 +18,9 @@ def main_panel_buttons():
 def extra_panel_buttons():
     return InlineKeyboardMarkup([
         [InlineKeyboardButton("👥 Admin List", callback_data="view_admins")],
-        [InlineKeyboardButton("⬅️ Back", callback_data="main_panel"),
-         InlineKeyboardButton("❌ Close", callback_data="close_adminpanel")]
+        [InlineKeyboardButton("⬅️", callback_data="main_panel"),
+         InlineKeyboardButton("❌ Close", callback_data="close_adminpanel"),
+         InlineKeyboardButton("➡️", callback_data="main_panel")]
     ])
 
 def back_close_buttons(back_cb="back_adminpanel"):
