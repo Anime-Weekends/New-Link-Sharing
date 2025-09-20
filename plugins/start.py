@@ -20,11 +20,22 @@ user_banned_until = {}
 cancel_lock = asyncio.Lock()
 is_canceled = False
 
+from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery, InputMediaPhoto
+from pyrogram.enums import ParseMode
+import asyncio
+from datetime import datetime, timedelta
 
-@Bot.on_message(filters.command('start') & filters.private)
+# your existing imports stay here (database, revoke_invite_after_5_minutes, etc.)
+
+SUPPORT_LINK = "https://t.me/YourSupportLink"
+
+
+# ========= START COMMAND ========= #
+@Bot.on_message(filters.command("start") & filters.private)
 async def start_command(client: Bot, message: Message):
     user_id = message.from_user.id
 
+    # anti-spam ban check
     if user_id in user_banned_until and datetime.now() < user_banned_until[user_id]:
         return await message.reply_text(
             "<b><blockquote expandable>You are temporarily banned from using commands due to spamming. Try again later.</b>",
@@ -35,6 +46,7 @@ async def start_command(client: Bot, message: Message):
 
     text = message.text
     if len(text) > 7:
+        # ---- your invite link logic unchanged ---- #
         try:
             base64_string = text.split(" ", 1)[1]
             is_request = base64_string.startswith("req_")
@@ -67,16 +79,15 @@ async def start_command(client: Bot, message: Message):
             if old_link_info:
                 try:
                     await client.revoke_chat_invite_link(channel_id, old_link_info["invite_link"])
-                    print(f"Revoked old {'request' if old_link_info['is_request'] else 'invite'} link for channel {channel_id}")
+                    print(f"Revoked old link for channel {channel_id}")
                 except Exception as e:
-                    print(f"Failed to revoke old link for channel {channel_id}: {e}")
+                    print(f"Failed to revoke old link: {e}")
 
             invite = await client.create_chat_invite_link(
                 chat_id=channel_id,
                 expire_date=datetime.now() + timedelta(minutes=5),
                 creates_join_request=is_request
             )
-
             await save_invite_link(channel_id, invite.invite_link, is_request)
 
             button_text = "• Request to Join •" if is_request else "• Join Channel •"
@@ -96,7 +107,6 @@ async def start_command(client: Bot, message: Message):
                 "<u><b>Note: If the link is expired, please click the post link again to get a new one.</b></u>",
                 parse_mode=ParseMode.HTML
             )
-
             asyncio.create_task(delete_after_delay(note_msg, 300))
             asyncio.create_task(revoke_invite_after_5_minutes(client, channel_id, invite.invite_link, is_request))
 
@@ -108,14 +118,14 @@ async def start_command(client: Bot, message: Message):
             print(f"Decoding error: {e}")
 
     else:
+        # start menu with new buttons
         inline_buttons = InlineKeyboardMarkup(
             [
-                [InlineKeyboardButton("• About", callback_data="about"),
-                 InlineKeyboardButton("• Channels", callback_data="channels")],
-                [InlineKeyboardButton("• Close •", callback_data="close")]
+                [InlineKeyboardButton("• More Commands •", callback_data="more_1")],
+                [InlineKeyboardButton("About", callback_data="about"),
+                 InlineKeyboardButton("Channels", callback_data="channels")]
             ]
         )
-
         try:
             await message.reply_photo(
                 photo=START_PIC,
@@ -123,8 +133,7 @@ async def start_command(client: Bot, message: Message):
                 reply_markup=inline_buttons,
                 parse_mode=ParseMode.HTML
             )
-        except Exception as e:
-            print(f"Error sending start picture: {e}")
+        except:
             await message.reply_text(
                 START_MSG,
                 reply_markup=inline_buttons,
@@ -132,10 +141,116 @@ async def start_command(client: Bot, message: Message):
             )
 
 
-@Bot.on_callback_query(filters.regex("close"))
-async def close_callback(client: Bot, callback_query):
-    await callback_query.answer()
-    await callback_query.message.delete()
+# ========= CALLBACK HANDLER ========= #
+@Bot.on_callback_query()
+async def cb_handler(client: Bot, query: CallbackQuery):
+    data = query.data
+
+    # ---- Close ---- #
+    if data == "close":
+        await query.message.delete()
+
+    # ---- About ---- #
+    elif data == "about":
+        await query.edit_message_text(
+            "<b>ℹ️ About:\n\nThis bot helps you manage invite links and broadcasts.</b>",
+            reply_markup=InlineKeyboardMarkup(
+                [[InlineKeyboardButton("Back", callback_data="home"),
+                  InlineKeyboardButton("Support", url=SUPPORT_LINK)]]
+            ),
+            parse_mode=ParseMode.HTML
+        )
+
+    # ---- Channels ---- #
+    elif data == "channels":
+        await query.edit_message_text(
+            "<b>📢 Channels:\n\nHere you will find the official channels list.</b>",
+            reply_markup=InlineKeyboardMarkup(
+                [[InlineKeyboardButton("Back", callback_data="home"),
+                  InlineKeyboardButton("Support", url=SUPPORT_LINK)]]
+            ),
+            parse_mode=ParseMode.HTML
+        )
+
+    # ---- Home ---- #
+    elif data == "home":
+        inline_buttons = InlineKeyboardMarkup(
+            [
+                [InlineKeyboardButton("• More Commands •", callback_data="more_1")],
+                [InlineKeyboardButton("About", callback_data="about"),
+                 InlineKeyboardButton("Channels", callback_data="channels")],
+                [InlineKeyboardButton("• Close •", callback_data="close")]
+            ]
+        )
+        await query.edit_message_caption(
+            caption=START_MSG,
+            reply_markup=inline_buttons,
+            parse_mode=ParseMode.HTML
+        )
+
+    # ---- More Commands (Page 1) ---- #
+    elif data == "more_1":
+        buttons = [
+            [InlineKeyboardButton("1", callback_data="cmd_1"),
+             InlineKeyboardButton("2", callback_data="cmd_2"),
+             InlineKeyboardButton("3", callback_data="cmd_3")],
+            [InlineKeyboardButton("4", callback_data="cmd_4"),
+             InlineKeyboardButton("5", callback_data="cmd_5"),
+             InlineKeyboardButton("6", callback_data="cmd_6")],
+            [InlineKeyboardButton("7", callback_data="cmd_7"),
+             InlineKeyboardButton("8", callback_data="cmd_8"),
+             InlineKeyboardButton("9", callback_data="cmd_9")],
+            [InlineKeyboardButton("<", callback_data="home"),
+             InlineKeyboardButton("Home", callback_data="home"),
+             InlineKeyboardButton(">", callback_data="more_2")]
+        ]
+        await query.edit_message_text(
+            "<b>📜 More Commands - Page 1</b>",
+            reply_markup=InlineKeyboardMarkup(buttons),
+            parse_mode=ParseMode.HTML
+        )
+
+    # ---- More Commands (Page 2) ---- #
+    elif data == "more_2":
+        buttons = [
+            [InlineKeyboardButton("10", callback_data="cmd_10"),
+             InlineKeyboardButton("11", callback_data="cmd_11")],
+            [InlineKeyboardButton("12", callback_data="cmd_12")],
+            [InlineKeyboardButton("<", callback_data="more_1"),
+             InlineKeyboardButton("Home", callback_data="home"),
+             InlineKeyboardButton(">", callback_data="more_3")]
+        ]
+        await query.edit_message_text(
+            "<b>📜 More Commands - Page 2</b>",
+            reply_markup=InlineKeyboardMarkup(buttons),
+            parse_mode=ParseMode.HTML
+        )
+
+    # ---- Example: More Pages (optional) ---- #
+    elif data == "more_3":
+        await query.edit_message_text(
+            "<b>📜 More Commands - Page 3\n\n(You can add more buttons here if needed)</b>",
+            reply_markup=InlineKeyboardMarkup(
+                [[InlineKeyboardButton("<", callback_data="more_2"),
+                  InlineKeyboardButton("Home", callback_data="home")]]
+            ),
+            parse_mode=ParseMode.HTML
+        )
+
+    # ---- All Command Buttons ---- #
+    elif data.startswith("cmd_"):
+        cmd_number = data.split("_")[1]
+        page_back = "more_1" if int(cmd_number) <= 9 else "more_2"
+        await query.edit_message_text(
+            f"<b>⚡ You selected Command {cmd_number}</b>\n\n"
+            f"Here is the description or usage for command <b>{cmd_number}</b>.",
+            reply_markup=InlineKeyboardMarkup(
+                [[InlineKeyboardButton("Back", callback_data=page_back),
+                  InlineKeyboardButton("Support", url=SUPPORT_LINK)]]
+            ),
+            parse_mode=ParseMode.HTML
+                )
+
 
 
 WAIT_MSG = "<b>Processing...</b>"
