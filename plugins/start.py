@@ -14,8 +14,6 @@ from plugins.newpost import revoke_invite_after_5_minutes
 from helper_func import *
 
 
-user_banned_until = {}
-
 # Broadcast variables
 cancel_lock = asyncio.Lock()
 is_canceled = False
@@ -28,6 +26,59 @@ from datetime import datetime, timedelta
 # your existing imports stay here (database, revoke_invite_after_5_minutes, etc.)
 
 SUPPORT_LINK = "https://t.me/YourSupportLink"
+
+
+from pyrogram.enums import ParseMode
+
+from database.database import (
+    add_user, save_invite_link,
+    get_channel_by_encoded_link, get_channel_by_encoded_link2,
+    get_current_invite_link
+)
+
+# Track banned users for spam protection
+user_banned_until = {}
+
+SUPPORT_LINK = "https://t.me/YourSupportLink"
+
+
+# ========= HELPERS ========= #
+async def delete_after_delay(msg: Message, delay: int):
+    await asyncio.sleep(delay)
+    try:
+        await msg.delete()
+    except:
+        pass
+
+
+async def revoke_invite_after_5_minutes(client, channel_id, invite_link, is_request):
+    await asyncio.sleep(300)
+    try:
+        await client.revoke_chat_invite_link(channel_id, invite_link)
+    except:
+        pass
+
+
+async def safe_edit_message(query: CallbackQuery, text: str, reply_markup=None):
+    """
+    Tries to edit caption first (for photo messages),
+    then falls back to text edits.
+    """
+    try:
+        await query.message.edit_caption(
+            caption=text,
+            reply_markup=reply_markup,
+            parse_mode=ParseMode.HTML
+        )
+    except Exception:
+        try:
+            await query.message.edit_text(
+                text,
+                reply_markup=reply_markup,
+                parse_mode=ParseMode.HTML
+            )
+        except:
+            await query.answer("⚠️ Message not modified.", show_alert=False)
 
 
 # ========= START COMMAND ========= #
@@ -46,7 +97,7 @@ async def start_command(client: Bot, message: Message):
 
     text = message.text
     if len(text) > 7:
-        # ---- your invite link logic unchanged ---- #
+        # ---- invite link logic ---- #
         try:
             base64_string = text.split(" ", 1)[1]
             is_request = base64_string.startswith("req_")
@@ -79,7 +130,6 @@ async def start_command(client: Bot, message: Message):
             if old_link_info:
                 try:
                     await client.revoke_chat_invite_link(channel_id, old_link_info["invite_link"])
-                    print(f"Revoked old link for channel {channel_id}")
                 except Exception as e:
                     print(f"Failed to revoke old link: {e}")
 
@@ -118,12 +168,13 @@ async def start_command(client: Bot, message: Message):
             print(f"Decoding error: {e}")
 
     else:
-        # start menu with new buttons
+        # start menu with buttons
         inline_buttons = InlineKeyboardMarkup(
             [
                 [InlineKeyboardButton("• More Commands •", callback_data="more_1")],
                 [InlineKeyboardButton("About", callback_data="about"),
-                 InlineKeyboardButton("Channels", callback_data="channels")]
+                 InlineKeyboardButton("Channels", callback_data="channels")],
+                [InlineKeyboardButton("• Close •", callback_data="close")]
             ]
         )
         try:
@@ -148,28 +199,31 @@ async def cb_handler(client: Bot, query: CallbackQuery):
 
     # ---- Close ---- #
     if data == "close":
-        await query.message.delete()
+        try:
+            await query.message.delete()
+        except:
+            await query.answer("❌ Can't close this panel.", show_alert=True)
 
     # ---- About ---- #
     elif data == "about":
-        await query.edit_message_text(
+        await safe_edit_message(
+            query,
             "<b>ℹ️ About:\n\nThis bot helps you manage invite links and broadcasts.</b>",
-            reply_markup=InlineKeyboardMarkup(
+            InlineKeyboardMarkup(
                 [[InlineKeyboardButton("Back", callback_data="home"),
                   InlineKeyboardButton("Support", url=SUPPORT_LINK)]]
-            ),
-            parse_mode=ParseMode.HTML
+            )
         )
 
     # ---- Channels ---- #
     elif data == "channels":
-        await query.edit_message_text(
+        await safe_edit_message(
+            query,
             "<b>📢 Channels:\n\nHere you will find the official channels list.</b>",
-            reply_markup=InlineKeyboardMarkup(
+            InlineKeyboardMarkup(
                 [[InlineKeyboardButton("Back", callback_data="home"),
                   InlineKeyboardButton("Support", url=SUPPORT_LINK)]]
-            ),
-            parse_mode=ParseMode.HTML
+            )
         )
 
     # ---- Home ---- #
@@ -182,11 +236,7 @@ async def cb_handler(client: Bot, query: CallbackQuery):
                 [InlineKeyboardButton("• Close •", callback_data="close")]
             ]
         )
-        await query.edit_message_caption(
-            caption=START_MSG,
-            reply_markup=inline_buttons,
-            parse_mode=ParseMode.HTML
-        )
+        await safe_edit_message(query, START_MSG, inline_buttons)
 
     # ---- More Commands (Page 1) ---- #
     elif data == "more_1":
@@ -204,11 +254,7 @@ async def cb_handler(client: Bot, query: CallbackQuery):
              InlineKeyboardButton("Home", callback_data="home"),
              InlineKeyboardButton(">", callback_data="more_2")]
         ]
-        await query.edit_message_text(
-            "<b>📜 More Commands - Page 1</b>",
-            reply_markup=InlineKeyboardMarkup(buttons),
-            parse_mode=ParseMode.HTML
-        )
+        await safe_edit_message(query, "<b>📜 More Commands - Page 1</b>", InlineKeyboardMarkup(buttons))
 
     # ---- More Commands (Page 2) ---- #
     elif data == "more_2":
@@ -220,36 +266,35 @@ async def cb_handler(client: Bot, query: CallbackQuery):
              InlineKeyboardButton("Home", callback_data="home"),
              InlineKeyboardButton(">", callback_data="more_3")]
         ]
-        await query.edit_message_text(
-            "<b>📜 More Commands - Page 2</b>",
-            reply_markup=InlineKeyboardMarkup(buttons),
-            parse_mode=ParseMode.HTML
-        )
+        await safe_edit_message(query, "<b>📜 More Commands - Page 2</b>", InlineKeyboardMarkup(buttons))
 
-    # ---- Example: More Pages (optional) ---- #
+    # ---- More Commands (Page 3) ---- #
     elif data == "more_3":
-        await query.edit_message_text(
+        await safe_edit_message(
+            query,
             "<b>📜 More Commands - Page 3\n\n(You can add more buttons here if needed)</b>",
-            reply_markup=InlineKeyboardMarkup(
+            InlineKeyboardMarkup(
                 [[InlineKeyboardButton("<", callback_data="more_2"),
                   InlineKeyboardButton("Home", callback_data="home")]]
-            ),
-            parse_mode=ParseMode.HTML
+            )
         )
 
     # ---- All Command Buttons ---- #
     elif data.startswith("cmd_"):
         cmd_number = data.split("_")[1]
         page_back = "more_1" if int(cmd_number) <= 9 else "more_2"
-        await query.edit_message_text(
+        await safe_edit_message(
+            query,
             f"<b>⚡ You selected Command {cmd_number}</b>\n\n"
             f"Here is the description or usage for command <b>{cmd_number}</b>.",
-            reply_markup=InlineKeyboardMarkup(
+            InlineKeyboardMarkup(
                 [[InlineKeyboardButton("Back", callback_data=page_back),
                   InlineKeyboardButton("Support", url=SUPPORT_LINK)]]
-            ),
-            parse_mode=ParseMode.HTML
-                )
+            )
+        )
+
+
+
 
 
 
