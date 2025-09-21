@@ -192,6 +192,7 @@ async def start_command(client: Bot, message: Message):
             )
 
 
+
 # ========= CALLBACK HANDLER ========= #
 @Bot.on_callback_query()
 async def cb_handler(client: Bot, query: CallbackQuery):
@@ -206,24 +207,24 @@ async def cb_handler(client: Bot, query: CallbackQuery):
 
     # ---- About ---- #
     elif data == "about":
-        await safe_edit_message(
-            query,
+        await query.message.edit_text(
             "<b>ℹ️ About:\n\nThis bot helps you manage invite links and broadcasts.</b>",
-            InlineKeyboardMarkup(
+            reply_markup=InlineKeyboardMarkup(
                 [[InlineKeyboardButton("Back", callback_data="home"),
                   InlineKeyboardButton("Support", url=SUPPORT_LINK)]]
-            )
+            ),
+            parse_mode=ParseMode.HTML
         )
 
     # ---- Channels ---- #
     elif data == "channels":
-        await safe_edit_message(
-            query,
+        await query.message.edit_text(
             "<b>📢 Channels:\n\nHere you will find the official channels list.</b>",
-            InlineKeyboardMarkup(
+            reply_markup=InlineKeyboardMarkup(
                 [[InlineKeyboardButton("Back", callback_data="home"),
                   InlineKeyboardButton("Support", url=SUPPORT_LINK)]]
-            )
+            ),
+            parse_mode=ParseMode.HTML
         )
 
     # ---- Home ---- #
@@ -236,7 +237,11 @@ async def cb_handler(client: Bot, query: CallbackQuery):
                 [InlineKeyboardButton("• Close •", callback_data="close")]
             ]
         )
-        await safe_edit_message(query, START_MSG, inline_buttons)
+        await query.message.edit_text(
+            START_MSG,
+            reply_markup=inline_buttons,
+            parse_mode=ParseMode.HTML
+        )
 
     # ---- More Commands (Page 1) ---- #
     elif data == "more_1":
@@ -254,7 +259,11 @@ async def cb_handler(client: Bot, query: CallbackQuery):
              InlineKeyboardButton("Home", callback_data="home"),
              InlineKeyboardButton(">", callback_data="more_2")]
         ]
-        await safe_edit_message(query, "<b>📜 More Commands - Page 1</b>", InlineKeyboardMarkup(buttons))
+        await query.message.edit_text(
+            "<b>📜 More Commands - Page 1</b>",
+            reply_markup=InlineKeyboardMarkup(buttons),
+            parse_mode=ParseMode.HTML
+        )
 
     # ---- More Commands (Page 2) ---- #
     elif data == "more_2":
@@ -266,34 +275,37 @@ async def cb_handler(client: Bot, query: CallbackQuery):
              InlineKeyboardButton("Home", callback_data="home"),
              InlineKeyboardButton(">", callback_data="more_3")]
         ]
-        await safe_edit_message(query, "<b>📜 More Commands - Page 2</b>", InlineKeyboardMarkup(buttons))
+        await query.message.edit_text(
+            "<b>📜 More Commands - Page 2</b>",
+            reply_markup=InlineKeyboardMarkup(buttons),
+            parse_mode=ParseMode.HTML
+        )
 
     # ---- More Commands (Page 3) ---- #
     elif data == "more_3":
-        await safe_edit_message(
-            query,
+        await query.message.edit_text(
             "<b>📜 More Commands - Page 3\n\n(You can add more buttons here if needed)</b>",
-            InlineKeyboardMarkup(
+            reply_markup=InlineKeyboardMarkup(
                 [[InlineKeyboardButton("<", callback_data="more_2"),
-                  InlineKeyboardButton("Home", callback_data="home")]]
-            )
+                  InlineKeyboardButton("Home", callback_data="home"),
+                  InlineKeyboardButton(">", callback_data="more_1")]]  # loop back to page 1
+            ),
+            parse_mode=ParseMode.HTML
         )
 
     # ---- All Command Buttons ---- #
     elif data.startswith("cmd_"):
         cmd_number = data.split("_")[1]
         page_back = "more_1" if int(cmd_number) <= 9 else "more_2"
-        await safe_edit_message(
-            query,
+        await query.message.edit_text(
             f"<b>⚡ You selected Command {cmd_number}</b>\n\n"
             f"Here is the description or usage for command <b>{cmd_number}</b>.",
-            InlineKeyboardMarkup(
+            reply_markup=InlineKeyboardMarkup(
                 [[InlineKeyboardButton("Back", callback_data=page_back),
                   InlineKeyboardButton("Support", url=SUPPORT_LINK)]]
-            )
+            ),
+            parse_mode=ParseMode.HTML
         )
-
-
 
 
 
