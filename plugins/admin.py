@@ -58,9 +58,13 @@ async def admin_panel_msg(client, message: Message):
 # ── SWITCH TO EXTRA PANEL ──
 @Client.on_callback_query(filters.regex("^extra_panel$"))
 async def extra_panel_cb(client, query: CallbackQuery):
+    text = (
+        "≡ 𝗔𝗗𝗠𝗜𝗡 𝗘𝗫𝗧𝗥𝗔 𝗣𝗔𝗡𝗘𝗟\n\n"
+        "›› Hᴇʀᴇ ʏᴏᴜ ᴄᴀɴ ᴠɪᴇᴡ ᴀᴅᴍɪɴ ʟɪsᴛ ᴀɴᴅ ᴏᴛʜᴇʀ ᴇxᴛʀᴀ ᴏᴩᴛɪᴏɴs.\nㅤ"
+    )
     await safe_edit(
         query,
-        "≡ 𝗔𝗗𝗠𝗜𝗡 𝗠𝗔𝗡𝗔𝗚𝗘𝗠𝗘𝗡𝗧 𝗣𝗔𝗡𝗘𝗟\n\n›› ᴛʜɪs ᴘᴀɴᴇʟ ᴀʟʟᴏᴡs ʏᴏᴜ ᴛᴏ sᴇᴀᴍʟᴇssʟʏ ᴀᴅᴅ, ʀᴇᴍᴏᴠᴇ, ᴀɴᴅ ᴠɪᴇᴡ ᴀʟʟ ᴄᴜʀʀᴇɴᴛ ᴀᴅᴍɪɴs.\nㅤ",
+        text,
         reply_markup=extra_panel_buttons()
     )
 
