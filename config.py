@@ -72,20 +72,20 @@ START_MSG = os.environ.get(
 # ║        Extra Texts & Channels   ║
 # ╚════════════════════════════════╝
 
-ABOUT_TXT = """<b><blockquote>◈ Mʏ ɴᴀᴍᴇ : <a href='https://t.me/AnimeWeekendBot'>ᴀᴅᴠ ʟɪɴᴋ sʜᴀʀɪɴɢ</blockquote></a>
+ABOUT_TXT = """ㅤ\n<b><blockquote>◈ Mʏ ɴᴀᴍᴇ : <a href='https://t.me/AnimeWeekendBot'>ᴀᴅᴠ ʟɪɴᴋ sʜᴀʀɪɴɢ</blockquote></a>
 <blockquote expandable>◈ Oᴡɴᴇʀ : <a href='tg://openmessage?user_id=6266529037'>R ᴇ x ʏ - レクシィ</a>
 ◈ Dᴇᴠᴇʟᴏᴘᴇʀ : <a href='https://t.me/RexySama'>ᴄʟɪᴄᴋ ʜᴇʀᴇ</a>
 ◈ ʟᴀɴɢᴜᴀɢᴇ : <a href='https://docs.python.org/3/'>ᴄʟɪᴄᴋ ʜᴇʀᴇ</a>
 ◈ ʟɪʙʀᴀʀʏ : <a href='https://docs.pyrogram.org/'>ᴄʟɪᴄᴋ ʜᴇʀᴇ</a>
-◈ ᴅᴀᴛᴀʙᴀsᴇ : <a href='https://www.mongodb.com/docs/'>ᴄʟɪᴄᴋ ʜᴇʀᴇ</a></blockquote></b>"""
+◈ ᴅᴀᴛᴀʙᴀsᴇ : <a href='https://www.mongodb.com/docs/'>ᴄʟɪᴄᴋ ʜᴇʀᴇ</a></blockquote></b>\nㅤ"""
 
-CHANNELS_TXT = """<b>›› ᴀɴɪᴍᴇ: <a href='https://t.me/animes_cruise'>ᴀɴɪᴍᴇ ᴄʀᴜɪsᴇ</a>
+CHANNELS_TXT = """ㅤ\n<b>›› ᴀɴɪᴍᴇ: <a href='https://t.me/animes_cruise'>ᴀɴɪᴍᴇ ᴄʀᴜɪsᴇ</a>
 <blockquote expandable>›› ᴍᴏᴠɪᴇs: <a href='https://t.me/movieflixspot'>ᴍᴏᴠɪᴇғʟɪx</a>
 ›› ᴡᴇʙsᴇʀɪᴇs: <a href='https://t.me/webseries_flix'>ᴡᴇʙsᴇʀɪᴇs ғʟɪx</a>
 ›› ᴀᴅᴜʟᴛ: <a href='https://t.me/hanime_arena'>ᴄᴏʀɴʜᴜʙ</a>
 ›› ᴍᴀɴʜᴡᴀ: <a href='https://t.me/pornhwa_flix'>ᴘᴏʀɴʜᴡᴀ</a>
 ›› ᴄᴏᴍᴍᴜɴɪᴛʏ: <a href='https://t.me/otakuflix_network'>ᴏᴛᴀᴋᴜғʟɪx</a>
-›› ᴅᴇᴠᴇʟᴏᴘᴇʀ: @ProYato</b></blockquote>"""
+›› ᴅᴇᴠᴇʟᴏᴘᴇʀ: @ProYato</b></blockquote>\nㅤ"""
 
 # ╔════════════════════════════════╗
 # ║             Bot Texts           ║
