@@ -132,9 +132,9 @@ async def start_command(client: Bot, message: Message):
     else:
         inline_buttons = InlineKeyboardMarkup(
             [
-                [InlineKeyboardButton("• ᴀʙᴏᴜᴛ", callback_data="about"),
-                 InlineKeyboardButton("• ᴄʜᴀɴɴᴇʟs", callback_data="channels")],
-                [InlineKeyboardButton("• Close •", callback_data="close")]
+                [InlineKeyboardButton("• ᴀʙᴏᴜᴛ", callback_data="about")],
+                [InlineKeyboardButton("• ᴄʜᴀɴɴᴇʟs", callback_data="channels"),
+                 InlineKeyboardButton("• Close •", callback_data="close")]
             ]
         )
         
@@ -142,6 +142,7 @@ async def start_command(client: Bot, message: Message):
             await message.reply_text(
                 f"{START_IMG}\n\n{START_MSG}",
                 reply_markup=inline_buttons,
+                disable_web_page_preview=False
                 parse_mode=ParseMode.HTML
             )
         except Exception as e:
