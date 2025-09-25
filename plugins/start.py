@@ -6,6 +6,7 @@ from pyrogram import Client, filters
 from pyrogram.enums import ParseMode
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery, InputMediaPhoto
 from pyrogram.errors import FloodWait
+from pyrogram.errors import MessageNotModified
 
 from bot import Bot
 from config import *
