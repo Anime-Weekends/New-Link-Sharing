@@ -14,6 +14,7 @@ import re
 # ╔════════════════════════════════╗
 # ║       Telegram API Credentials  ║
 # ╚════════════════════════════════╝
+
 TG_BOT_TOKEN = os.environ.get("TG_BOT_TOKEN", "7716452978:AAF8zMYazok32rDAcJvtesVwQlzWnOsfEjc")
 APP_ID = int(os.environ.get("APP_ID", "28744454"))
 API_HASH = os.environ.get("API_HASH", "debd37cef0ad1a1ce45d0be8e8c3c5e7")
@@ -21,18 +22,21 @@ API_HASH = os.environ.get("API_HASH", "debd37cef0ad1a1ce45d0be8e8c3c5e7")
 # ╔════════════════════════════════╗
 # ║       Owner & Bot Information   ║
 # ╚════════════════════════════════╝
+
 OWNER_ID = int(os.environ.get("OWNER_ID", "6266529037"))
 PORT = os.environ.get("PORT", "8080")
 
 # ╔════════════════════════════════╗
 # ║       Database Configuration    ║
 # ╚════════════════════════════════╝
+
 DB_URI = os.environ.get("DB_URI", "mongodb+srv://Rexybecomenice:Rexybecomenice@cluster0.4oosu31.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
 DB_NAME = os.environ.get("DB_NAME", "link")
 
 # ╔════════════════════════════════╗
 # ║        Auto Approve Settings    ║
 # ╚════════════════════════════════╝
+
 id_pattern = re.compile(r"^-?\d+$")  # Regex for chat IDs
 CHAT_ID = [
     int(app_chat_id) if id_pattern.search(app_chat_id) else app_chat_id
@@ -47,11 +51,13 @@ APPROVED = environ.get("APPROVED_WELCOME", "on").lower()
 # ╔════════════════════════════════╗
 # ║        Default Configurations   ║
 # ╚════════════════════════════════╝
+
 TG_BOT_WORKERS = int(os.environ.get("TG_BOT_WORKERS", "40"))
 
 # ╔════════════════════════════════╗
 # ║        Start & Help Messages    ║
 # ╚════════════════════════════════╝
+
 START_PIC_FILE_ID = "https://i.ibb.co/kNm80v1/photo-2025-08-12-19-47-36-7537788116967358496.jpg"
 START_IMG = START_PIC_FILE_ID
 START_MSG = os.environ.get(
@@ -61,31 +67,17 @@ START_MSG = os.environ.get(
     "≡ 𝗙𝗨𝗟𝗟𝗬 𝗔𝗗𝗩𝗔𝗡𝗖𝗘𝗗 ʟɪɴᴋ sʜᴀʀɪɴɢ sʏsᴛᴇᴍ ᴡɪᴛʜ ᴄᴏᴏʟᴅᴏᴡɴ, ɪɴᴠɪᴛᴇ ᴛʀᴀᴄᴋɪɴɢ & ᴍᴏʀᴇ.\n"
     "ㅤ",
 )
-HELP = os.environ.get(
-    "HELP_MESSAGE",
-    "<b><blockquote expandable>» Creator: <a href=https://t.me/proyato>Yato</a>\n"
-    "» Our Community: <a href=https://t.me/otakuflix_network>Flix Network</a>\n"
-    "» Anime Channel: <a href=https://t.me/animes_cruise>Anime Cruise</a>\n"
-    "» Ongoing Anime: <a href=https://t.me/Ongoing_cruise>Ongoing Cruise</a>\n"
-    "» Developer: <a href=https://t.me/onlyyuji>Yuji</a></b>",
-)
-ABOUT = os.environ.get(
-    "ABOUT_MESSAGE",
-    "<b><blockquote expandable>This bot is developed by Yato (@ProYato) "
-    "to securely share Telegram channel links with temporary invite links, "
-    "protecting your channels from copyright issues.</b>",
-)
 
 # ╔════════════════════════════════╗
 # ║        Extra Texts & Channels   ║
 # ╚════════════════════════════════╝
-ABOUT_TXT = """<b>›› ᴄᴏᴍᴍᴜɴɪᴛʏ: <a href='https://t.me/otakuflix_network'>ᴏᴛᴀᴋᴜғʟɪx</a>
-<blockquote expandable>›› ᴜᴘᴅᴀᴛᴇs: <a href='https://t.me/codeflix_bots'>Cʟɪᴄᴋ ʜᴇʀᴇ</a>
-›› ᴏᴡɴᴇʀ: <a href='https://t.me/cosmic_freak'>ʏᴀᴛᴏ</a>
-›› ʟᴀɴɢᴜᴀɢᴇ: <a href='https://docs.python.org/3/'>Pʏᴛʜᴏɴ 3</a>
-›› ʟɪʙʀᴀʀʏ: <a href='https://docs.pyrogram.org/'>Pʏʀᴏɢʀᴀᴍ v2</a>
-›› ᴅᴀᴛᴀʙᴀsᴇ: <a href='https://www.mongodb.com/docs/'>Mᴏɴɢᴏ ᴅʙ</a>
-›› ᴅᴇᴠᴇʟᴏᴘᴇʀ: @ProYato</b></blockquote>"""
+
+ABOUT_TXT = """<b><blockquote>◈ Mʏ ɴᴀᴍᴇ : <a href='https://t.me/AnimeWeekendBot'>ᴀᴅᴠ ʟɪɴᴋ sʜᴀʀɪɴɢ</blockquote></a>
+<blockquote expandable>◈ Oᴡɴᴇʀ : <a href='tg://openmessage?user_id=6266529037'>R ᴇ x ʏ - レクシィ</a>
+◈ Dᴇᴠᴇʟᴏᴘᴇʀ : <a href='https://t.me/RexySama'>ᴄʟɪᴄᴋ ʜᴇʀᴇ</a>
+◈ ʟᴀɴɢᴜᴀɢᴇ : <a href='https://docs.python.org/3/'>ᴄʟɪᴄᴋ ʜᴇʀᴇ</a>
+◈ ʟɪʙʀᴀʀʏ : <a href='https://docs.pyrogram.org/'>ᴄʟɪᴄᴋ ʜᴇʀᴇ</a>
+◈ ᴅᴀᴛᴀʙᴀsᴇ : <a href='https://www.mongodb.com/docs/'>ᴄʟɪᴄᴋ ʜᴇʀᴇ</a>"""
 
 CHANNELS_TXT = """<b>›› ᴀɴɪᴍᴇ: <a href='https://t.me/animes_cruise'>ᴀɴɪᴍᴇ ᴄʀᴜɪsᴇ</a>
 <blockquote expandable>›› ᴍᴏᴠɪᴇs: <a href='https://t.me/movieflixspot'>ᴍᴏᴠɪᴇғʟɪx</a>
@@ -98,12 +90,14 @@ CHANNELS_TXT = """<b>›› ᴀɴɪᴍᴇ: <a href='https://t.me/animes_cruise'>
 # ╔════════════════════════════════╗
 # ║             Bot Texts           ║
 # ╚════════════════════════════════╝
+
 BOT_STATS_TEXT = "<b>BOT UPTIME</b>\n{uptime}"
 USER_REPLY_TEXT = "⚠️ ғᴜᴄᴋ ʏᴏᴜ, ʏᴏᴜ ᴀʀᴇ ɴᴏᴛ ᴍʏ ᴍᴀsᴛᴇʀ. ɢᴏ ᴀᴡᴀʏ, ʙɪᴛᴄʜ 🙃!"
 
 # ╔════════════════════════════════╗
 # ║          Logging Setup          ║
 # ╚════════════════════════════════╝
+
 LOG_FILE_NAME = "links-sharingbot.txt"
 DATABASE_CHANNEL = int(os.environ.get("DATABASE_CHANNEL", "-1002624286889"))  # Channel where user links are stored
 
@@ -136,5 +130,6 @@ logging.getLogger("pyrogram").setLevel(logging.WARNING)
 # ╔════════════════════════════════╗
 # ║          Logger Function        ║
 # ╚════════════════════════════════╝
+
 def LOGGER(name: str) -> logging.Logger:
     return logging.getLogger(name)
