@@ -155,7 +155,7 @@ async def remove_admin_cb(client, query: CallbackQuery):
 
     await safe_edit(
         query,
-        "<pre>◈ Sᴇʟᴇᴄᴛ ᴀɴ ᴀᴅᴍɪɴ ᴛᴏ ʀᴇᴍᴏᴠᴇ :</pre>",
+        "≡ Sᴇʟᴇᴄᴛ ᴛʜᴇ 𝗨𝗦𝗘𝗥 𝗜𝗗 ᴏғ ᴛʜᴇ ᴜsᴇʀ ᴛᴏ ʀᴇᴍᴏᴠᴇ ᴀs ғʀᴏᴍ ᴀᴅᴍɪɴ.\n›› 𝟯𝟬s ᴛɪᴍᴇᴏᴜᴛ.\nㅤ",
         reply_markup=InlineKeyboardMarkup(buttons)
     )
 
