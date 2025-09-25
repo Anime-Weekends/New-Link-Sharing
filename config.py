@@ -56,10 +56,10 @@ START_PIC_FILE_ID = "https://i.ibb.co/kNm80v1/photo-2025-08-12-19-47-36-75377881
 START_IMG = START_PIC_FILE_ID
 START_MSG = os.environ.get(
     "START_MESSAGE",
-    "<b>ᴡᴇʟᴄᴏᴍᴇ ᴛᴏ ᴛʜᴇ ᴀᴅᴠᴀɴᴄᴇᴅ ʟɪɴᴋs sʜᴀʀɪɴɢ ʙᴏᴛ.\n\n"
-    "ᴡɪᴛʜ ᴛʜɪs ʙᴏᴛ, ʏᴏᴜ ᴄᴀɴ sʜᴀʀᴇ ʟɪɴᴋs ᴀɴᴅ ᴋᴇᴇᴘ ʏᴏᴜʀ ᴄʜᴀɴɴᴇʟs "
-    "sᴀғᴇ ғʀᴏᴍ ᴄᴏᴘʏʀɪɢʜᴛ ɪssᴜᴇs.\n\n"
-    "<blockquote>‣ ᴍᴀɪɴᴛᴀɪɴᴇᴅ ʙʏ : <a href='https://t.me/codeflix_bots'>ʏᴀᴛᴏ</a></blockquote></b>",
+    "ㅤ\nㅤ\n"
+    "≡ 𝗜'𝗠 𝗟𝗜𝗡𝗞 𝗦𝗛𝗔𝗥𝗜𝗡𝗚 𝗕𝗢𝗧, ʟɪɴᴋ ᴍᴀɴᴀɢᴇʀ ʙᴏᴛ ᴅᴇsɪɢɴᴇᴅ ᴇxᴄʟᴜsɪᴠᴇʟʏ ғᴏʀ <b>ᴇᴍɪɴᴇɴᴄᴇ sᴏᴄɪᴇᴛʏ.</b>\n\n"
+    "≡ 𝗙𝗨𝗟𝗟𝗬 𝗔𝗗𝗩𝗔𝗡𝗖𝗘𝗗 ʟɪɴᴋ sʜᴀʀɪɴɢ sʏsᴛᴇᴍ ᴡɪᴛʜ ᴄᴏᴏʟᴅᴏᴡɴ, ɪɴᴠɪᴛᴇ ᴛʀᴀᴄᴋɪɴɢ & ᴍᴏʀᴇ.\n"
+    "ㅤ",
 )
 HELP = os.environ.get(
     "HELP_MESSAGE",
