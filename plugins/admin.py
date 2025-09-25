@@ -8,25 +8,25 @@ from database.database import add_admin, remove_admin, list_admins
 # ── BUTTON HELPERS ──
 def main_panel_buttons():
     return InlineKeyboardMarkup([
-        [InlineKeyboardButton("➕ Add Admin", callback_data="add_admin"),
-         InlineKeyboardButton("➖ Remove Admin", callback_data="remove_admin")],
-        [InlineKeyboardButton("⬅️", callback_data="back_adminpanel"),
-         InlineKeyboardButton("❌ Close", callback_data="close_adminpanel"),
-         InlineKeyboardButton("➡️", callback_data="extra_panel")]
+        [InlineKeyboardButton("Aᴅᴅ ᴀᴅᴍɪɴ", callback_data="add_admin"),
+         InlineKeyboardButton("Rᴇᴍᴏᴠᴇ ᴀᴅᴍɪɴ", callback_data="remove_admin")],
+        [InlineKeyboardButton("◁", callback_data="back_adminpanel"),
+         InlineKeyboardButton("✘ Cʟᴏsᴇ", callback_data="close_adminpanel"),
+         InlineKeyboardButton("▷", callback_data="extra_panel")]
     ])
 
 def extra_panel_buttons():
     return InlineKeyboardMarkup([
-        [InlineKeyboardButton("👥 Admin List", callback_data="view_admins")],
-        [InlineKeyboardButton("⬅️", callback_data="main_panel"),
-         InlineKeyboardButton("❌ Close", callback_data="close_adminpanel"),
-         InlineKeyboardButton("➡️", callback_data="main_panel")]
+        [InlineKeyboardButton("Aᴅᴍɪɴ ʟɪsᴛ", callback_data="view_admins")],
+        [InlineKeyboardButton("◁", callback_data="main_panel"),
+         InlineKeyboardButton("✘ Cʟᴏsᴇ", callback_data="close_adminpanel"),
+         InlineKeyboardButton("▷", callback_data="main_panel")]
     ])
 
 def back_close_buttons(back_cb="back_adminpanel"):
     return InlineKeyboardMarkup([
-        [InlineKeyboardButton("⬅️ Back", callback_data=back_cb),
-         InlineKeyboardButton("❌ Close", callback_data="close_adminpanel")]
+        [InlineKeyboardButton("◁ Bᴀᴄᴋ", callback_data=back_cb),
+         InlineKeyboardButton("✘ Cᴏsᴇ", callback_data="close_adminpanel")]
     ])
 
 
@@ -43,14 +43,14 @@ async def safe_edit(query: CallbackQuery, new_text: str, reply_markup=None, disa
         else:
             await query.answer()
     except Exception:
-        await query.answer("⚠️ Update failed.", show_alert=True)
+        await query.answer("Uᴘᴅᴀᴛᴇ ғᴀɪʟᴇᴅ", show_alert=True)
 
 
 # ── MAIN ADMIN PANEL ──
 @Client.on_message(filters.command("adminpanel") & filters.user(OWNER_ID))
 async def admin_panel_msg(client, message: Message):
     await message.reply_text(
-        "<b>⚙️ Admin Management Panel</b>",
+        "≡ 𝗔𝗗𝗠𝗜𝗡 𝗠𝗔𝗡𝗔𝗚𝗘𝗠𝗘𝗡𝗧 𝗣𝗔𝗡𝗘𝗟\n\n›› ᴛʜɪs ᴘᴀɴᴇʟ ᴀʟʟᴏᴡs ʏᴏᴜ ᴛᴏ sᴇᴀᴍʟᴇssʟʏ ᴀᴅᴅ, ʀᴇᴍᴏᴠᴇ, ᴀɴᴅ ᴠɪᴇᴡ ᴀʟʟ ᴄᴜʀʀᴇɴᴛ ᴀᴅᴍɪɴs.\nㅤ",
         reply_markup=main_panel_buttons()
     )
 
@@ -60,7 +60,7 @@ async def admin_panel_msg(client, message: Message):
 async def extra_panel_cb(client, query: CallbackQuery):
     await safe_edit(
         query,
-        "📋 <b>Extra Options</b>",
+        "≡ 𝗔𝗗𝗠𝗜𝗡 𝗠𝗔𝗡𝗔𝗚𝗘𝗠𝗘𝗡𝗧 𝗣𝗔𝗡𝗘𝗟\n\n›› ᴛʜɪs ᴘᴀɴᴇʟ ᴀʟʟᴏᴡs ʏᴏᴜ ᴛᴏ sᴇᴀᴍʟᴇssʟʏ ᴀᴅᴅ, ʀᴇᴍᴏᴠᴇ, ᴀɴᴅ ᴠɪᴇᴡ ᴀʟʟ ᴄᴜʀʀᴇɴᴛ ᴀᴅᴍɪɴs.\nㅤ",
         reply_markup=extra_panel_buttons()
     )
 
@@ -70,7 +70,7 @@ async def extra_panel_cb(client, query: CallbackQuery):
 async def back_adminpanel(client, query: CallbackQuery):
     await safe_edit(
         query,
-        "<b>⚙️ Admin Management Panel</b>",
+        "≡ 𝗔𝗗𝗠𝗜𝗡 𝗠𝗔𝗡𝗔𝗚𝗘𝗠𝗘𝗡𝗧 𝗣𝗔𝗡𝗘𝗟\n\n›› ᴛʜɪs ᴘᴀɴᴇʟ ᴀʟʟᴏᴡs ʏᴏᴜ ᴛᴏ sᴇᴀᴍʟᴇssʟʏ ᴀᴅᴅ, ʀᴇᴍᴏᴠᴇ, ᴀɴᴅ ᴠɪᴇᴡ ᴀʟʟ ᴄᴜʀʀᴇɴᴛ ᴀᴅᴍɪɴs.\nㅤ",
         reply_markup=main_panel_buttons()
     )
 
@@ -80,7 +80,7 @@ async def back_adminpanel(client, query: CallbackQuery):
 async def view_admins_cb(client, query: CallbackQuery):
     admins = await list_admins()
     if not admins:
-        text = "❌ No admins found."
+        text = "<pre>✘ Nᴏ ᴀᴅᴍɪɴs ғᴏᴜɴᴅ</pre>"
     else:
         lines = []
         for uid in admins:
@@ -89,10 +89,10 @@ async def view_admins_cb(client, query: CallbackQuery):
                 name = f"{user.first_name or ''} {user.last_name or ''}".strip()
                 username = f"@{user.username}" if user.username else "—"
                 clickable_id = f"<a href='tg://openmessage?user_id={uid}'>{uid}</a>"
-                lines.append(f"👤 <b>{name}</b>\n🆔 {clickable_id}\n🌐 {username}")
+                lines.append(f"<blockquote>›› <b>{name}</b>\n›› {clickable_id}\n›› {username}</blockquote>")
             except Exception:
-                lines.append(f"👤 Unknown\n🆔 <a href='tg://openmessage?user_id={uid}'>{uid}</a>\n🌐 —")
-        text = "👥 <b>Admin List</b>\n\n" + "\n\n".join(lines)
+                lines.append(f"<blockquote>›› Unknown\n›› <a href='tg://openmessage?user_id={uid}'>{uid}</a>\n›› —</blockquote>")
+        text = "≡ |  𝗔𝗗𝗠𝗜𝗡 𝗟𝗜𝗦𝗧  |\n\n" + "\n\n".join(lines)
 
     await safe_edit(
         query,
@@ -106,7 +106,7 @@ async def view_admins_cb(client, query: CallbackQuery):
 async def add_admin_cb(client, query: CallbackQuery):
     await safe_edit(
         query,
-        "✏️ Send me the <b>User ID</b> of the user to add as admin.\n\n⌛ 30s timeout.",
+        "≡ Sᴇɴᴅ ᴍᴇ ᴛʜᴇ 𝗨𝗦𝗘𝗥 𝗜𝗗 ᴏғ ᴛʜᴇ ᴜsᴇʀ ᴛᴏ ᴀᴅᴅ ᴀs ᴀᴅᴍɪɴ.\n\n›› 𝟯𝟬s ᴛɪᴍᴇᴏᴜᴛ\nㅤ",
         reply_markup=back_close_buttons()
     )
 
@@ -115,20 +115,20 @@ async def add_admin_cb(client, query: CallbackQuery):
     except asyncio.TimeoutError:
         return await safe_edit(
             query,
-            "⌛ Timed out. Returning to admin panel.",
+            "<pre>◈ Tɪᴍᴇᴅ ᴏᴜᴛ. ʀᴇᴛᴜʀɴɪɴɢ ᴛᴏ ᴀᴅᴍɪɴ ᴘᴀɴᴇʟ</pre>",
             reply_markup=main_panel_buttons()
         )
 
     if not response.text.isdigit():
         return await safe_edit(
             query,
-            "❌ Invalid User ID. Returning to admin panel.",
+            "<pre>✘ Iɴᴠᴀʟɪᴅ ᴜsᴇʀ ɪᴅ. ʀᴇᴛᴜʀɴɪɴɢ ᴛᴏ ᴀᴅᴍɪɴ ᴘᴀɴᴇʟ</pre>",
             reply_markup=main_panel_buttons()
         )
 
     user_id = int(response.text.strip())
     success = await add_admin(user_id)
-    status = f"✅ User <code>{user_id}</code> added as admin." if success else f"❌ Failed to add <code>{user_id}</code> as admin."
+    status = f"<pre>✔ Usᴇʀ <code>{user_id}</code> ᴀᴅᴅᴇᴅ ᴀs ᴀᴅᴍɪɴ</pre>" if success else f"<pre>✘ Fᴀɪʟᴇᴅ ᴛᴏ ᴀᴅᴅ <code>{user_id}</code> ᴀs ᴀᴅᴍɪɴ</pre>"
 
     await safe_edit(query, status, reply_markup=back_close_buttons())
 
@@ -140,22 +140,22 @@ async def remove_admin_cb(client, query: CallbackQuery):
     if not admins:
         return await safe_edit(
             query,
-            "❌ No admins to remove.",
+            "<pre>✘ Nᴏ ᴀᴅᴍɪɴs ᴛᴏ ʀᴇᴍᴏᴠᴇ</pre>",
             reply_markup=back_close_buttons()
         )
 
     buttons = [
-        [InlineKeyboardButton(f"❌ {uid}", callback_data=f"deladmin_{uid}")]
+        [InlineKeyboardButton(f"✘ {uid}", callback_data=f"deladmin_{uid}")]
         for uid in admins
     ]
     buttons.append([
-        InlineKeyboardButton("⬅️ Back", callback_data="back_adminpanel"),
-        InlineKeyboardButton("❌ Close", callback_data="close_adminpanel")
+        InlineKeyboardButton("◁ Bᴀᴄᴋ", callback_data="back_adminpanel"),
+        InlineKeyboardButton("✘ Cʟᴏsᴇ", callback_data="close_adminpanel")
     ])
 
     await safe_edit(
         query,
-        "👥 Select an admin to remove:",
+        "<pre>◈ Sᴇʟᴇᴄᴛ ᴀɴ ᴀᴅᴍɪɴ ᴛᴏ ʀᴇᴍᴏᴠᴇ :</pre>",
         reply_markup=InlineKeyboardMarkup(buttons)
     )
 
@@ -164,7 +164,7 @@ async def remove_admin_cb(client, query: CallbackQuery):
 async def deladmin_cb(client, query: CallbackQuery):
     user_id = int(query.data.split("_")[1])
     success = await remove_admin(user_id)
-    status = f"✅ Removed <code>{user_id}</code> from admins." if success else f"❌ Failed to remove <code>{user_id}</code>."
+    status = f"<pre>✔ Rᴇᴍᴏᴠᴇᴅ <code>{user_id}</code> ғʀᴏᴍ ᴀᴅᴍɪɴs</pre>" if success else f"<pre>✘ Fᴀɪʟᴇᴅ ᴛᴏ ʀᴇᴍᴏᴠᴇ <code>{user_id}</code></pre>"
 
     await safe_edit(query, status, reply_markup=back_close_buttons())
 
@@ -175,4 +175,4 @@ async def close_adminpanel(client, query: CallbackQuery):
     try:
         await query.message.delete()
     except:
-        await query.answer("❌ Can't close this panel.", show_alert=True)
+        await query.answer("✘ Cᴀɴ'ᴛ ᴄʟᴏsᴇ ᴛʜɪs ᴘᴀɴᴇʟ", show_alert=True)
