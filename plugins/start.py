@@ -139,10 +139,10 @@ async def start_command(client: Bot, message: Message):
         )
         
         try:
-            await message.reply_text(
-                f"{START_IMG}\n\n{START_MSG}",
+            await message.reply_photo(
+                photo=START_PIC,
+                caption=START_MSG,
                 reply_markup=inline_buttons,
-                disable_web_page_preview=False
                 parse_mode=ParseMode.HTML
             )
         except Exception as e:
