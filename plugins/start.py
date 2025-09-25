@@ -22,6 +22,10 @@ is_canceled = False
 # Track banned users for spam protection
 user_banned_until = {}
 
+# Replace with your start image
+LINK_IMAGE = START_IMG
+
+
 @Bot.on_message(filters.command('start') & filters.private)
 async def start_command(client: Bot, message: Message):
     user_id = message.from_user.id
@@ -32,7 +36,7 @@ async def start_command(client: Bot, message: Message):
                 "<b><blockquote expandable>You are temporarily banned from using commands due to spamming. Try again later.</b>",
                 parse_mode=ParseMode.HTML
             )
-            
+
     await add_user(user_id)
 
     text = message.text
@@ -40,13 +44,13 @@ async def start_command(client: Bot, message: Message):
         try:
             base64_string = text.split(" ", 1)[1]
             is_request = base64_string.startswith("req_")
-            
+
             if is_request:
                 base64_string = base64_string[4:]
                 channel_id = await get_channel_by_encoded_link2(base64_string)
             else:
                 channel_id = await get_channel_by_encoded_link(base64_string)
-            
+
             if not channel_id:
                 return await message.reply_text(
                     "<b><blockquote expandable>Invalid or expired invite link.</b>",
@@ -58,14 +62,19 @@ async def start_command(client: Bot, message: Message):
             original_link = await get_original_link(channel_id)
             if original_link:
                 button = InlineKeyboardMarkup(
-                    [[InlineKeyboardButton("• Proceed to Link •", url=original_link)]]
+                    [
+                        [InlineKeyboardButton("• Proceed to Link •", url=original_link)],
+                        [InlineKeyboardButton("🔄 Refresh Link", callback_data=f"refresh_link:{channel_id}:{is_request}")]
+                    ]
                 )
-                return await message.reply_text(
-                    "<b><blockquote expandable>ʜᴇʀᴇ ɪs ʏᴏᴜʀ ʟɪɴᴋ! ᴄʟɪᴄᴋ ʙᴇʟᴏᴡ ᴛᴏ ᴘʀᴏᴄᴇᴇᴅ</b>",
+                return await message.reply_photo(
+                    photo=LINK_IMAGE,
+                    caption="<b><blockquote expandable>ʜᴇʀᴇ ɪs ʏᴏᴜʀ ʟɪɴᴋ! ᴄʟɪᴄᴋ ʙᴇʟᴏᴡ ᴛᴏ ᴘʀᴏᴄᴇᴇᴅ</b>",
                     reply_markup=button,
                     parse_mode=ParseMode.HTML
                 )
 
+            # Revoke old invite link if exists
             old_link_info = await get_current_invite_link(channel_id)
             if old_link_info:
                 try:
@@ -74,6 +83,7 @@ async def start_command(client: Bot, message: Message):
                 except Exception as e:
                     print(f"Failed to revoke old link for channel {channel_id}: {e}")
 
+            # Create new invite link
             invite = await client.create_chat_invite_link(
                 chat_id=channel_id,
                 expire_date=datetime.now() + timedelta(minutes=5),
@@ -83,30 +93,38 @@ async def start_command(client: Bot, message: Message):
             await save_invite_link(channel_id, invite.invite_link, is_request)
 
             button_text = "• ʀᴇǫᴜᴇsᴛ ᴛᴏ ᴊᴏɪɴ •" if is_request else "• ᴊᴏɪɴ ᴄʜᴀɴɴᴇʟ •"
-            button = InlineKeyboardMarkup([[InlineKeyboardButton(button_text, url=invite.invite_link)]])
+            button = InlineKeyboardMarkup(
+                [
+                    [InlineKeyboardButton(button_text, url=invite.invite_link)],
+                    [InlineKeyboardButton("🔄 Refresh Link", callback_data=f"refresh_link:{channel_id}:{is_request}")]
+                ]
+            )
 
             wait_msg = await message.reply_text(
                 "<b>Please wait...</b>",
                 parse_mode=ParseMode.HTML
             )
-            
+
             await asyncio.sleep(0.5)
             await wait_msg.delete()
-            
-            await message.reply_text(
-                "<b><blockquote expandable>ʜᴇʀᴇ ɪs ʏᴏᴜʀ ʟɪɴᴋ! ᴄʟɪᴄᴋ ʙᴇʟᴏᴡ ᴛᴏ ᴘʀᴏᴄᴇᴇᴅ</b>",
+
+            await message.reply_photo(
+                photo=LINK_IMAGE,
+                caption="<b><blockquote expandable>ʜᴇʀᴇ ɪs ʏᴏᴜʀ ʟɪɴᴋ! ᴄʟɪᴄᴋ ʙᴇʟᴏᴡ ᴛᴏ ᴘʀᴏᴄᴇᴇᴅ</b>",
                 reply_markup=button,
                 parse_mode=ParseMode.HTML
             )
 
             note_msg = await message.reply_text(
-                "<u><b>Note: If the link is expired, please click the post link again to get a new one.</b></u>",
+                "<u><b>Note: If the link is expired, please click the refresh button to get a new one.</b></u>",
                 parse_mode=ParseMode.HTML
             )
 
             # Auto-delete the note message after 5 minutes
             asyncio.create_task(delete_after_delay(note_msg, 300))
-            asyncio.create_task(revoke_invite_after_5_minutes(client, channel_id, invite.invite_link, is_request))
+            asyncio.create_task(
+                revoke_invite_after_5_minutes(client, channel_id, invite.invite_link, is_request)
+            )
 
         except Exception as e:
             await message.reply_text(
@@ -118,27 +136,62 @@ async def start_command(client: Bot, message: Message):
         inline_buttons = InlineKeyboardMarkup(
             [
                 [InlineKeyboardButton("Cʜᴀɴɴᴇʟs", callback_data="channels")],
-                [InlineKeyboardButton("Aʙᴏᴜᴛ", callback_data="about"),
-                 InlineKeyboardButton("Cʟᴏsᴇ", callback_data="close")]
+                [
+                    InlineKeyboardButton("Aʙᴏᴜᴛ", callback_data="about"),
+                    InlineKeyboardButton("Cʟᴏsᴇ", callback_data="close"),
+                ],
             ]
         )
-        
+
         try:
             await message.reply_photo(
                 photo=START_IMG,
                 caption=START_MSG,
                 reply_markup=inline_buttons,
-                parse_mode=ParseMode.HTML
+                parse_mode=ParseMode.HTML,
             )
         except Exception as e:
             print(f"Error sending start picture: {e}")
             await message.reply_text(
                 START_MSG,
                 reply_markup=inline_buttons,
-                parse_mode=ParseMode.HTML
+                parse_mode=ParseMode.HTML,
             )
 
 
+# --- Refresh Button Handler ---
+@Bot.on_callback_query(filters.regex(r"^refresh_link:(\d+):(\w+)$"))
+async def refresh_link_cb(client, query):
+    channel_id, is_request = query.data.split(":")[1:]
+    is_request = is_request == "True"
+
+    # Revoke old link
+    old_link_info = await get_current_invite_link(int(channel_id))
+    if old_link_info:
+        try:
+            await client.revoke_chat_invite_link(int(channel_id), old_link_info["invite_link"])
+        except:
+            pass
+
+    # Create new invite link
+    invite = await client.create_chat_invite_link(
+        chat_id=int(channel_id),
+        expire_date=datetime.now() + timedelta(minutes=5),
+        creates_join_request=is_request
+    )
+    await save_invite_link(int(channel_id), invite.invite_link, is_request)
+
+    # Update buttons
+    button_text = "• ʀᴇǫᴜᴇsᴛ ᴛᴏ ᴊᴏɪɴ •" if is_request else "• ᴊᴏɪɴ ᴄʜᴀɴɴᴇʟ •"
+    button = InlineKeyboardMarkup(
+        [
+            [InlineKeyboardButton(button_text, url=invite.invite_link)],
+            [InlineKeyboardButton("🔄 Refresh Link", callback_data=f"refresh_link:{channel_id}:{is_request}")]
+        ]
+    )
+
+    await query.message.edit_reply_markup(reply_markup=button)
+    await query.answer("✅ Link refreshed!")
 
 WAIT_MSG = "<b>Processing...</b>"
 REPLY_ERROR = "<code>Use this command as a reply to any Telegram message without any spaces.</code>"
