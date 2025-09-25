@@ -19,22 +19,6 @@ from helper_func import *
 cancel_lock = asyncio.Lock()
 is_canceled = False
 
-from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery, InputMediaPhoto
-from pyrogram.enums import ParseMode
-import asyncio
-from datetime import datetime, timedelta
-
-# your existing imports stay here (database, revoke_invite_after_5_minutes, etc.)
-
-
-from pyrogram.enums import ParseMode
-
-from database.database import (
-    add_user, save_invite_link,
-    get_channel_by_encoded_link, get_channel_by_encoded_link2,
-    get_current_invite_link
-)
-
 # Track banned users for spam protection
 user_banned_until = {}
 
@@ -133,8 +117,8 @@ async def start_command(client: Bot, message: Message):
     else:
         inline_buttons = InlineKeyboardMarkup(
             [
-                [InlineKeyboardButton("• ᴀʙᴏᴜᴛ", callback_data="about")],
-                [InlineKeyboardButton("• ᴄʜᴀɴɴᴇʟs", callback_data="channels"),
+                [InlineKeyboardButton("Cʜᴀɴɴᴇʟs", callback_data="channels")],
+                [InlineKeyboardButton("Aʙᴏᴜᴛ", callback_data="about"),
                  InlineKeyboardButton("• Close •", callback_data="close")]
             ]
         )
@@ -288,9 +272,9 @@ async def cb_handler(client: Bot, query: CallbackQuery):
     elif data in ["start", "home"]:
         inline_buttons = InlineKeyboardMarkup(
             [
-                [InlineKeyboardButton("• About", callback_data="about"),
-                 InlineKeyboardButton("• Channels", callback_data="channels")],
-                [InlineKeyboardButton("• Close •", callback_data="close")]
+                [InlineKeyboardButton("Cʜᴀɴɴᴇʟs", callback_data="channels")],
+                [InlineKeyboardButton("Aʙᴏᴜᴛ", callback_data="about"),
+                 InlineKeyboardButton("• Close •", callback_data="close")]
             ]
         )
         try:
