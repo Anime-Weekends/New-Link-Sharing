@@ -77,7 +77,7 @@ ABOUT_TXT = """<b><blockquote>◈ Mʏ ɴᴀᴍᴇ : <a href='https://t.me/AnimeW
 ◈ Dᴇᴠᴇʟᴏᴘᴇʀ : <a href='https://t.me/RexySama'>ᴄʟɪᴄᴋ ʜᴇʀᴇ</a>
 ◈ ʟᴀɴɢᴜᴀɢᴇ : <a href='https://docs.python.org/3/'>ᴄʟɪᴄᴋ ʜᴇʀᴇ</a>
 ◈ ʟɪʙʀᴀʀʏ : <a href='https://docs.pyrogram.org/'>ᴄʟɪᴄᴋ ʜᴇʀᴇ</a>
-◈ ᴅᴀᴛᴀʙᴀsᴇ : <a href='https://www.mongodb.com/docs/'>ᴄʟɪᴄᴋ ʜᴇʀᴇ</a>"""
+◈ ᴅᴀᴛᴀʙᴀsᴇ : <a href='https://www.mongodb.com/docs/'>ᴄʟɪᴄᴋ ʜᴇʀᴇ</a></blockquote></b>"""
 
 CHANNELS_TXT = """<b>›› ᴀɴɪᴍᴇ: <a href='https://t.me/animes_cruise'>ᴀɴɪᴍᴇ ᴄʀᴜɪsᴇ</a>
 <blockquote expandable>›› ᴍᴏᴠɪᴇs: <a href='https://t.me/movieflixspot'>ᴍᴏᴠɪᴇғʟɪx</a>
