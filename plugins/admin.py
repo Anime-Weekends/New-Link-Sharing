@@ -1,8 +1,12 @@
 import asyncio
-from config import *
+from config import OWNER_ID
 from pyrogram import Client, filters
+from pyrogram.enums import ParseMode, ChatAction
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 from database.database import add_admin, remove_admin, list_admins
+
+# Temporary dict to store user states for adding admin
+waiting_for_admin_input = {}
 
 
 # ── BUTTON HELPERS ──
@@ -15,6 +19,7 @@ def main_panel_buttons():
          InlineKeyboardButton("▷", callback_data="extra_panel")]
     ])
 
+
 def extra_panel_buttons():
     return InlineKeyboardMarkup([
         [InlineKeyboardButton("Aᴅᴍɪɴ ʟɪsᴛ", callback_data="view_admins")],
@@ -23,10 +28,11 @@ def extra_panel_buttons():
          InlineKeyboardButton("▷", callback_data="main_panel")]
     ])
 
+
 def back_close_buttons(back_cb="back_adminpanel"):
     return InlineKeyboardMarkup([
         [InlineKeyboardButton("◁ Bᴀᴄᴋ", callback_data=back_cb),
-         InlineKeyboardButton("✘ Cᴏsᴇ", callback_data="close_adminpanel")]
+         InlineKeyboardButton("✘ Cʟᴏsᴇ", callback_data="close_adminpanel")]
     ])
 
 
@@ -38,7 +44,8 @@ async def safe_edit(query: CallbackQuery, new_text: str, reply_markup=None, disa
             await query.message.edit_text(
                 new_text,
                 reply_markup=reply_markup,
-                disable_web_page_preview=disable_web_preview
+                disable_web_page_preview=disable_web_preview,
+                parse_mode=ParseMode.HTML
             )
         else:
             await query.answer()
@@ -106,31 +113,44 @@ async def view_admins_cb(client, query: CallbackQuery):
 async def add_admin_cb(client, query: CallbackQuery):
     await safe_edit(
         query,
-        "≡ Sᴇɴᴅ ᴍᴇ ᴛʜᴇ 𝗨𝗦𝗘𝗥 𝗜𝗗 ᴏғ ᴛʜᴇ ᴜsᴇʀ ᴛᴏ ᴀᴅᴅ ᴀs ᴀᴅᴍɪɴ.\n\n›› 𝟯𝟬s ᴛɪᴍᴇᴏᴜᴛ\nㅤ",
+        "≡ Sᴇɴᴅ ᴛʜᴇ 𝗨𝗦𝗘𝗥 𝗜𝗗 ᴏғ ᴛʜᴇ ᴜsᴇʀ ᴛᴏ ᴀᴅᴅ ᴀs ᴀᴅᴍɪɴ.\n\n›› 𝟯𝟬s ᴛɪᴍᴇᴏᴜᴛ\nㅤ",
         reply_markup=back_close_buttons()
     )
+    waiting_for_admin_input[query.message.chat.id] = True
 
-    try:
-        response: Message = await client.listen(query.message.chat.id, timeout=30)
-    except asyncio.TimeoutError:
-        return await safe_edit(
-            query,
-            "<pre>◈ Tɪᴍᴇᴅ ᴏᴜᴛ. ʀᴇᴛᴜʀɴɪɴɢ ᴛᴏ ᴀᴅᴍɪɴ ᴘᴀɴᴇʟ</pre>",
-            reply_markup=main_panel_buttons()
+
+@Client.on_message(filters.text & filters.user(OWNER_ID))
+async def handle_add_admin_input(client, message: Message):
+    if not waiting_for_admin_input.get(message.chat.id):
+        return
+
+    user_input = message.text.strip()
+    
+    # Delete the user input immediately
+    await message.delete()
+
+    # Show typing action while processing
+    await client.send_chat_action(message.chat.id, ChatAction.TYPING)
+
+    if not user_input.isdigit():
+        await message.reply(
+            "<pre>✘ Iɴᴠᴀʟɪᴅ ᴜsᴇʀ ɪᴅ. ᴀᴅᴍɪɴ ɴᴏᴛ ᴀᴅᴅᴇᴅ</pre>", 
+            parse_mode=ParseMode.HTML
         )
+        waiting_for_admin_input.pop(message.chat.id, None)
+        return
 
-    if not response.text.isdigit():
-        return await safe_edit(
-            query,
-            "<pre>✘ Iɴᴠᴀʟɪᴅ ᴜsᴇʀ ɪᴅ. ʀᴇᴛᴜʀɴɪɴɢ ᴛᴏ ᴀᴅᴍɪɴ ᴘᴀɴᴇʟ</pre>",
-            reply_markup=main_panel_buttons()
-        )
-
-    user_id = int(response.text.strip())
+    user_id = int(user_input)
     success = await add_admin(user_id)
-    status = f"<pre>✔ Usᴇʀ <code>{user_id}</code> ᴀᴅᴅᴇᴅ ᴀs ᴀᴅᴍɪɴ</pre>" if success else f"<pre>✘ Fᴀɪʟᴇᴅ ᴛᴏ ᴀᴅᴅ <code>{user_id}</code> ᴀs ᴀᴅᴍɪɴ</pre>"
+    status = (f"<pre>✔ Usᴇʀ <code>{user_id}</code> ᴀᴅᴅᴇᴅ ᴀs ᴀᴅᴍɪɴ</pre>" 
+              if success else f"<pre>✘ Fᴀɪʟᴇᴅ ᴛᴏ ᴀᴅᴅ <code>{user_id}</code></pre>")
 
-    await safe_edit(query, status, reply_markup=back_close_buttons())
+    await message.reply(
+        status, 
+        parse_mode=ParseMode.HTML, 
+        reply_markup=main_panel_buttons()
+    )
+    waiting_for_admin_input.pop(message.chat.id, None)
 
 
 # ── REMOVE ADMIN ──
@@ -155,7 +175,7 @@ async def remove_admin_cb(client, query: CallbackQuery):
 
     await safe_edit(
         query,
-        "≡ Sᴇʟᴇᴄᴛ ᴛʜᴇ 𝗨𝗦𝗘𝗥 𝗜𝗗 ᴏғ ᴛʜᴇ ᴜsᴇʀ ᴛᴏ ʀᴇᴍᴏᴠᴇ ᴀs ғʀᴏᴍ ᴀᴅᴍɪɴ.\n›› 𝟯𝟬s ᴛɪᴍᴇᴏᴜᴛ.\nㅤ",
+        "<pre>◈ Sᴇʟᴇᴄᴛ ᴀɴ ᴀᴅᴍɪɴ ᴛᴏ ʀᴇᴍᴏᴠᴇ :</pre>",
         reply_markup=InlineKeyboardMarkup(buttons)
     )
 
@@ -163,6 +183,10 @@ async def remove_admin_cb(client, query: CallbackQuery):
 @Client.on_callback_query(filters.regex("^deladmin_"))
 async def deladmin_cb(client, query: CallbackQuery):
     user_id = int(query.data.split("_")[1])
+    
+    # Show typing action while processing
+    await client.send_chat_action(query.message.chat.id, ChatAction.TYPING)
+
     success = await remove_admin(user_id)
     status = f"<pre>✔ Rᴇᴍᴏᴠᴇᴅ <code>{user_id}</code> ғʀᴏᴍ ᴀᴅᴍɪɴs</pre>" if success else f"<pre>✘ Fᴀɪʟᴇᴅ ᴛᴏ ʀᴇᴍᴏᴠᴇ <code>{user_id}</code></pre>"
 
