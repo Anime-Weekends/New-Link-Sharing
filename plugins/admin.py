@@ -8,7 +8,6 @@ from database.database import add_admin, remove_admin, list_admins
 # Temporary dict to store user states for adding admin
 waiting_for_admin_input = {}
 
-
 # ── BUTTON HELPERS ──
 def main_panel_buttons():
     return InlineKeyboardMarkup([
@@ -19,15 +18,13 @@ def main_panel_buttons():
          InlineKeyboardButton("▷", callback_data="extra_panel")]
     ])
 
-
 def extra_panel_buttons():
     return InlineKeyboardMarkup([
         [InlineKeyboardButton("Aᴅᴍɪɴ ʟɪsᴛ", callback_data="view_admins")],
         [InlineKeyboardButton("◁", callback_data="main_panel"),
          InlineKeyboardButton("✘ Cʟᴏsᴇ", callback_data="close_adminpanel"),
-         InlineKeyboardButton("▷", callback_data="main_panel")]
+         InlineKeyboardButton("▷", callback_data="extra_panel")]
     ])
-
 
 def back_close_buttons(back_cb="back_adminpanel"):
     return InlineKeyboardMarkup([
@@ -35,10 +32,8 @@ def back_close_buttons(back_cb="back_adminpanel"):
          InlineKeyboardButton("✘ Cʟᴏsᴇ", callback_data="close_adminpanel")]
     ])
 
-
 # ── SAFE EDIT ──
 async def safe_edit(query: CallbackQuery, new_text: str, reply_markup=None, disable_web_preview=True):
-    """Safely edit messages to avoid 'message not modified' error"""
     try:
         if query.message.text != new_text:
             await query.message.edit_text(
@@ -52,7 +47,6 @@ async def safe_edit(query: CallbackQuery, new_text: str, reply_markup=None, disa
     except Exception:
         await query.answer("Uᴘᴅᴀᴛᴇ ғᴀɪʟᴇᴅ", show_alert=True)
 
-
 # ── MAIN ADMIN PANEL ──
 @Client.on_message(filters.command("adminpanel") & filters.user(OWNER_ID))
 async def admin_panel_msg(client, message: Message):
@@ -60,7 +54,6 @@ async def admin_panel_msg(client, message: Message):
         "≡ 𝗔𝗗𝗠𝗜𝗡 𝗠𝗔𝗡𝗔𝗚𝗘𝗠𝗘𝗡𝗧 𝗣𝗔𝗡𝗘𝗟\n\n›› ᴛʜɪs ᴘᴀɴᴇʟ ᴀʟʟᴏᴡs ʏᴏᴜ ᴛᴏ sᴇᴀᴍʟᴇssʟʏ ᴀᴅᴅ, ʀᴇᴍᴏᴠᴇ, ᴀɴᴅ ᴠɪᴇᴡ ᴀʟʟ ᴄᴜʀʀᴇɴᴛ ᴀᴅᴍɪɴs.\nㅤ",
         reply_markup=main_panel_buttons()
     )
-
 
 # ── SWITCH TO EXTRA PANEL ──
 @Client.on_callback_query(filters.regex("^extra_panel$"))
@@ -71,7 +64,6 @@ async def extra_panel_cb(client, query: CallbackQuery):
         reply_markup=extra_panel_buttons()
     )
 
-
 # ── BACK TO MAIN PANEL ──
 @Client.on_callback_query(filters.regex("^main_panel$|^back_adminpanel$"))
 async def back_adminpanel(client, query: CallbackQuery):
@@ -80,7 +72,6 @@ async def back_adminpanel(client, query: CallbackQuery):
         "≡ 𝗔𝗗𝗠𝗜𝗡 𝗠𝗔𝗡𝗔𝗚𝗘𝗠𝗘𝗡𝗧 𝗣𝗔𝗡𝗘𝗟\n\n›› ᴛʜɪs ᴘᴀɴᴇʟ ᴀʟʟᴏᴡs ʏᴏᴜ ᴛᴏ sᴇᴀᴍʟᴇssʟʏ ᴀᴅᴅ, ʀᴇᴍᴏᴠᴇ, ᴀɴᴅ ᴠɪᴇᴡ ᴀʟʟ ᴄᴜʀʀᴇɴᴛ ᴀᴅᴍɪɴs.\nㅤ",
         reply_markup=main_panel_buttons()
     )
-
 
 # ── VIEW ADMINS ──
 @Client.on_callback_query(filters.regex("^view_admins$"))
@@ -101,12 +92,7 @@ async def view_admins_cb(client, query: CallbackQuery):
                 lines.append(f"<blockquote>›› Unknown\n›› <a href='tg://openmessage?user_id={uid}'>{uid}</a>\n›› —</blockquote>")
         text = "≡ |  𝗔𝗗𝗠𝗜𝗡 𝗟𝗜𝗦𝗧  |\n\n" + "\n\n".join(lines)
 
-    await safe_edit(
-        query,
-        text,
-        reply_markup=back_close_buttons("extra_panel")
-    )
-
+    await safe_edit(query, text, reply_markup=back_close_buttons("extra_panel"))
 
 # ── ADD ADMIN ──
 @Client.on_callback_query(filters.regex("^add_admin$"))
@@ -116,27 +102,24 @@ async def add_admin_cb(client, query: CallbackQuery):
         "≡ Sᴇɴᴅ ᴛʜᴇ 𝗨𝗦𝗘𝗥 𝗜𝗗 ᴏғ ᴛʜᴇ ᴜsᴇʀ ᴛᴏ ᴀᴅᴅ ᴀs ᴀᴅᴍɪɴ.\n\n›› 𝟯𝟬s ᴛɪᴍᴇᴏᴜᴛ\nㅤ",
         reply_markup=back_close_buttons()
     )
-    waiting_for_admin_input[query.message.chat.id] = True
-
+    waiting_for_admin_input[query.message.chat.id] = query  # store query for editing later
 
 @Client.on_message(filters.text & filters.user(OWNER_ID))
 async def handle_add_admin_input(client, message: Message):
-    if not waiting_for_admin_input.get(message.chat.id):
+    query = waiting_for_admin_input.get(message.chat.id)
+    if not query:
         return
 
     user_input = message.text.strip()
     
-    # Delete the user input immediately
+    # Delete the UID message immediately
     await message.delete()
 
-    # Show typing action while processing
+    # Typing action
     await client.send_chat_action(message.chat.id, ChatAction.TYPING)
 
     if not user_input.isdigit():
-        await message.reply(
-            "<pre>✘ Iɴᴠᴀʟɪᴅ ᴜsᴇʀ ɪᴅ. ᴀᴅᴍɪɴ ɴᴏᴛ ᴀᴅᴅᴇᴅ</pre>", 
-            parse_mode=ParseMode.HTML
-        )
+        await safe_edit(query, "<pre>✘ Iɴᴠᴀʟɪᴅ ᴜsᴇʀ ɪᴅ. ᴀᴅᴍɪɴ ɴᴏᴛ ᴀᴅᴅᴇᴅ</pre>", reply_markup=main_panel_buttons())
         waiting_for_admin_input.pop(message.chat.id, None)
         return
 
@@ -145,24 +128,15 @@ async def handle_add_admin_input(client, message: Message):
     status = (f"<pre>✔ Usᴇʀ <code>{user_id}</code> ᴀᴅᴅᴇᴅ ᴀs ᴀᴅᴍɪɴ</pre>" 
               if success else f"<pre>✘ Fᴀɪʟᴇᴅ ᴛᴏ ᴀᴅᴅ <code>{user_id}</code></pre>")
 
-    await message.reply(
-        status, 
-        parse_mode=ParseMode.HTML, 
-        reply_markup=main_panel_buttons()
-    )
+    await safe_edit(query, status, reply_markup=main_panel_buttons())
     waiting_for_admin_input.pop(message.chat.id, None)
-
 
 # ── REMOVE ADMIN ──
 @Client.on_callback_query(filters.regex("^remove_admin$"))
 async def remove_admin_cb(client, query: CallbackQuery):
     admins = await list_admins()
     if not admins:
-        return await safe_edit(
-            query,
-            "<pre>✘ Nᴏ ᴀᴅᴍɪɴs ᴛᴏ ʀᴇᴍᴏᴠᴇ</pre>",
-            reply_markup=back_close_buttons()
-        )
+        return await safe_edit(query, "<pre>✘ Nᴏ ᴀᴅᴍɪɴs ᴛᴏ ʀᴇᴍᴏᴠᴇ</pre>", reply_markup=back_close_buttons())
 
     buttons = [
         [InlineKeyboardButton(f"✘ {uid}", callback_data=f"deladmin_{uid}")]
@@ -173,25 +147,19 @@ async def remove_admin_cb(client, query: CallbackQuery):
         InlineKeyboardButton("✘ Cʟᴏsᴇ", callback_data="close_adminpanel")
     ])
 
-    await safe_edit(
-        query,
-        "<pre>◈ Sᴇʟᴇᴄᴛ ᴀɴ ᴀᴅᴍɪɴ ᴛᴏ ʀᴇᴍᴏᴠᴇ :</pre>",
-        reply_markup=InlineKeyboardMarkup(buttons)
-    )
-
+    await safe_edit(query, "≡ Sᴇʟᴇᴄᴛ ᴛʜᴇ 𝗨𝗦𝗘𝗥 𝗜𝗗 ᴏғ ᴛʜᴇ ᴜsᴇʀ ᴛᴏ ʀᴇᴍᴏᴠᴇ ᴀs ғʀᴏᴍ ᴀᴅᴍɪɴ.\n\n›› 𝟯𝟬s ᴛɪᴍᴇᴏᴜᴛ.\nㅤ", reply_markup=InlineKeyboardMarkup(buttons))
 
 @Client.on_callback_query(filters.regex("^deladmin_"))
 async def deladmin_cb(client, query: CallbackQuery):
     user_id = int(query.data.split("_")[1])
     
-    # Show typing action while processing
+    # Typing action
     await client.send_chat_action(query.message.chat.id, ChatAction.TYPING)
 
     success = await remove_admin(user_id)
     status = f"<pre>✔ Rᴇᴍᴏᴠᴇᴅ <code>{user_id}</code> ғʀᴏᴍ ᴀᴅᴍɪɴs</pre>" if success else f"<pre>✘ Fᴀɪʟᴇᴅ ᴛᴏ ʀᴇᴍᴏᴠᴇ <code>{user_id}</code></pre>"
 
     await safe_edit(query, status, reply_markup=back_close_buttons())
-
 
 # ── CLOSE PANEL ──
 @Client.on_callback_query(filters.regex("^close_adminpanel$"))
