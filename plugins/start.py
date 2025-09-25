@@ -139,9 +139,8 @@ async def start_command(client: Bot, message: Message):
         )
         
         try:
-            await message.reply_photo(
-                photo=START_PIC,
-                caption=START_MSG,
+            await message.reply_text(
+                f"{START_IMG}\n\n{START_MSG}",
                 reply_markup=inline_buttons,
                 parse_mode=ParseMode.HTML
             )
