@@ -59,7 +59,7 @@ TG_BOT_WORKERS = int(os.environ.get("TG_BOT_WORKERS", "40"))
 # ╚════════════════════════════════╝
 
 START_PIC_FILE_ID = "https://i.ibb.co/kNm80v1/photo-2025-08-12-19-47-36-7537788116967358496.jpg"
-START_IMG = START_PIC_FILE_ID
+START_IMG = "https://telegra.ph/HgBotz-09-25"
 START_MSG = os.environ.get(
     "START_MESSAGE",
     "ㅤ\nㅤ\n"
