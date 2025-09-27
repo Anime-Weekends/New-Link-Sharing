@@ -120,7 +120,7 @@ async def start_command(client: Bot, message: Message):
             [
                 [InlineKeyboardButton("Cʜᴀɴɴᴇʟs", callback_data="channels")],
                 [InlineKeyboardButton("Aʙᴏᴜᴛ", callback_data="about"),
-                 InlineKeyboardButton(InlineKeyboardButton("Cʟᴏsᴇ", callback_data="close")]
+                 InlineKeyboardButton("Cʟᴏsᴇ", callback_data="close")]
             ]
         )
         
