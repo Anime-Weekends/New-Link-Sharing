@@ -79,13 +79,13 @@ ABOUT_TXT = """ㅤ\n<b><blockquote>◈ Mʏ ɴᴀᴍᴇ : <a href='https://t.me/A
 ◈ ʟɪʙʀᴀʀʏ : <a href='https://docs.pyrogram.org/'>ᴄʟɪᴄᴋ ʜᴇʀᴇ</a>
 ◈ ᴅᴀᴛᴀʙᴀsᴇ : <a href='https://www.mongodb.com/docs/'>ᴄʟɪᴄᴋ ʜᴇʀᴇ</a></blockquote></b>\nㅤ"""
 
-CHANNELS_TXT = """ㅤ\n<b>›› ᴀɴɪᴍᴇ: <a href='https://t.me/animes_cruise'>ᴀɴɪᴍᴇ ᴄʀᴜɪsᴇ</a>
-<blockquote expandable>›› ᴍᴏᴠɪᴇs: <a href='https://t.me/movieflixspot'>ᴍᴏᴠɪᴇғʟɪx</a>
-›› ᴡᴇʙsᴇʀɪᴇs: <a href='https://t.me/webseries_flix'>ᴡᴇʙsᴇʀɪᴇs ғʟɪx</a>
-›› ᴀᴅᴜʟᴛ: <a href='https://t.me/hanime_arena'>ᴄᴏʀɴʜᴜʙ</a>
-›› ᴍᴀɴʜᴡᴀ: <a href='https://t.me/pornhwa_flix'>ᴘᴏʀɴʜᴡᴀ</a>
-›› ᴄᴏᴍᴍᴜɴɪᴛʏ: <a href='https://t.me/otakuflix_network'>ᴏᴛᴀᴋᴜғʟɪx</a>
-›› ᴅᴇᴠᴇʟᴏᴘᴇʀ: @ProYato</b></blockquote>\nㅤ"""
+CHANNELS_TXT = """ㅤ\n<blockquote expandable><b>◈ Aɴɪᴍᴇ Cʜᴀɴɴᴇʟ : <a href='https://t.me/Anime_Weekends'>ᴄʟɪᴄᴋ ʜᴇʀᴇ</a>
+◈ Oɴɢᴏɪɴɢ Cʜᴀɴɴᴇʟ : <a href=''>ᴄʟɪᴄᴋ ʜᴇʀᴇ</a>
+◈ Aɴɪᴍᴇ Iɴᴅᴇx Cʜᴀɴɴᴇʟ :  <a href='https://t.me/+zc1zoff06ZVjNWU1'>ᴄʟɪᴄᴋ ʜᴇʀᴇ</a>
+◈ Kᴅʀᴀᴍᴀ Cʜᴀɴɴᴇʟ : <a href='https://t.me/Kdrama_Weekends'>ᴄʟɪᴄᴋ ʜᴇʀᴇ</a>
+◈ Wᴇʙsᴇʀɪᴇs Cʜᴀɴɴᴇʟ : <a href='https://t.me/+A7l9mm0Q1VJjODc9'>ᴄʟɪᴄᴋ ʜᴇʀᴇ</a>
+◈ Mᴀɴɢᴀ Cʜᴀɴɴᴇʟ : <a href='https://t.me/Manga_Weekend'>ᴄʟɪᴄᴋ ʜᴇʀᴇ</a>
+◈ Cᴜʟᴛᴜʀᴇᴅ Cʜᴀɴɴᴇʟ : <a href='https://t.me/Cultured_Weekends'>ᴄʟɪᴄᴋ ʜᴇʀᴇ</a></b></blockquote>\nㅤ"""
 
 # ╔════════════════════════════════╗
 # ║             Bot Texts           ║
