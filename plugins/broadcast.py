@@ -35,6 +35,9 @@ async def del_user(chat_id):
     """Remove a user from the broadcast database"""
     user_database.discard(chat_id)
 
+def is_owner_or_admin(_, __, message):
+    return message.from_user and message.from_user.id in ADMINS
+
 # ------------------- SPAM MONITOR ------------------- #
 
 @Bot.on_message(filters.private)
