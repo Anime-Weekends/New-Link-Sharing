@@ -142,10 +142,12 @@ async def start_command(client: Bot, message: Message):
 
 
 # ========================= CALLBACK HANDLER ========================= #
+
 @Bot.on_callback_query()
 async def cb_handler(client: Bot, query: CallbackQuery):
     data = query.data
 
+    # Close button
     if data == "close":
         await query.answer()
         try:
@@ -154,35 +156,44 @@ async def cb_handler(client: Bot, query: CallbackQuery):
             pass
         return
 
+    # Dot animation for About / Channels
     elif data in ["about", "channels"]:
-        # Dot animation
         try:
             dots = ["● ○ ○", "● ● ○", "● ● ●"]
             for d in dots:
                 await query.message.edit_text(d)
-                await asyncio.sleep(0.3)
+                await asyncio.sleep(0.1)
         except:
             pass
 
         caption = ABOUT_TXT if data == "about" else CHANNELS_TXT
         inline_buttons = InlineKeyboardMarkup([
-            [InlineKeyboardButton('• Back', callback_data='start'),
-             InlineKeyboardButton('• Close •', callback_data='close')]
+            [InlineKeyboardButton('• Back', callback_data='start')],
+            [InlineKeyboardButton('• Close •', callback_data='close')]
         ])
+
         try:
+            # Try with media first
             await query.message.edit_media(
                 InputMediaPhoto("https://envs.sh/Wdj.jpg", caption),
                 reply_markup=inline_buttons
             )
         except:
-            await query.message.edit_text(caption, reply_markup=inline_buttons)
+            # If original message had no photo, fallback to text
+            await query.message.edit_text(
+                text=caption,
+                reply_markup=inline_buttons,
+                parse_mode=ParseMode.HTML
+            )
 
+    # Start / Home
     elif data in ["start", "home"]:
         inline_buttons = InlineKeyboardMarkup([
             [InlineKeyboardButton("• About", callback_data="about"),
              InlineKeyboardButton("• Channels", callback_data="channels")],
             [InlineKeyboardButton("• Close •", callback_data="close")]
         ])
+
         try:
             await query.message.edit_media(
                 InputMediaPhoto(START_PIC, START_MSG),
@@ -190,11 +201,10 @@ async def cb_handler(client: Bot, query: CallbackQuery):
             )
         except:
             await query.message.edit_text(
-                START_MSG,
+                text=START_MSG,
                 reply_markup=inline_buttons,
                 parse_mode=ParseMode.HTML
             )
-
 
 # ========================= SPAM MONITOR ========================= #
 @Bot.on_message(filters.private)
