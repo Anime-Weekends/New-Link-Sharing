@@ -5,7 +5,7 @@
 import asyncio
 import time
 from datetime import datetime, timedelta
-from pyrogram import Client, filters
+from pyrogram import filters
 from pyrogram.enums import ParseMode
 from pyrogram.types import (
     Message,
@@ -22,18 +22,19 @@ from helper_func import *
 from plugins.newpost import revoke_invite_after_5_minutes
 
 # ========================= GLOBALS ========================= #
-
 user_message_count = {}
-user_banned_until = {}
-
 user_banned_until = {}
 cancel_lock = asyncio.Lock()
 is_canceled = False
 WAIT_MSG = "<b>Processing...</b>"
 REPLY_ERROR = "<code>Use this command as a reply to any Telegram message without any spaces.</code>"
 
+# ========================= ADMINS FILTER ========================= #
+def is_owner_or_admin(_, __, message: Message):
+    return message.from_user and message.from_user.id in ADMINS
+
 # ========================= START COMMAND ========================= #
-@Bot.on_message(filters.command('start') & filters.private)
+@Bot.on_message(filters.command("start") & filters.private)
 async def start_command(client: Bot, message: Message):
     user_id = message.from_user.id
     now = datetime.now()
@@ -45,8 +46,10 @@ async def start_command(client: Bot, message: Message):
             parse_mode=ParseMode.HTML
         )
 
+    # Add user to database
     await add_user(user_id)
 
+    # Handle invite links
     text = message.text
     if len(text) > 7:
         try:
@@ -65,14 +68,13 @@ async def start_command(client: Bot, message: Message):
                     parse_mode=ParseMode.HTML
                 )
 
-            from database.database import get_original_link
             original_link = await get_original_link(channel_id)
             if original_link:
                 button = InlineKeyboardMarkup(
                     [[InlineKeyboardButton("• Proceed to Link •", url=original_link)]]
                 )
                 return await message.reply_text(
-                    "<b><blockquote expandable>ʜᴇʀᴇ ɪs ʏᴏᴜʀ ʟɪɴᴋ! ᴄʟɪᴄᴋ ʙᴇʟᴏᴡ ᴛᴏ ᴘʀᴏᴄᴇᴇᴅ</b>",
+                    "<b><blockquote expandable>Here is your link! Click below to proceed</b>",
                     reply_markup=button,
                     parse_mode=ParseMode.HTML
                 )
@@ -81,9 +83,8 @@ async def start_command(client: Bot, message: Message):
             if old_link_info:
                 try:
                     await client.revoke_chat_invite_link(channel_id, old_link_info["invite_link"])
-                    print(f"Revoked old {'request' if old_link_info['is_request'] else 'invite'} link for channel {channel_id}")
-                except Exception as e:
-                    print(f"Failed to revoke old link for channel {channel_id}: {e}")
+                except:
+                    pass
 
             invite = await client.create_chat_invite_link(
                 chat_id=channel_id,
@@ -92,7 +93,7 @@ async def start_command(client: Bot, message: Message):
             )
             await save_invite_link(channel_id, invite.invite_link, is_request)
 
-            button_text = "• ʀᴇǫᴜᴇsᴛ ᴛᴏ ᴊᴏɪɴ •" if is_request else "• ᴊᴏɪɴ ᴄʜᴀɴɴᴇʟ •"
+            button_text = "• Request to Join •" if is_request else "• Join Channel •"
             button = InlineKeyboardMarkup([[InlineKeyboardButton(button_text, url=invite.invite_link)]])
 
             wait_msg = await message.reply_text("<b>Please wait...</b>", parse_mode=ParseMode.HTML)
@@ -100,7 +101,7 @@ async def start_command(client: Bot, message: Message):
             await wait_msg.delete()
 
             await message.reply_text(
-                "<b><blockquote expandable>ʜᴇʀᴇ ɪs ʏᴏᴜʀ ʟɪɴᴋ! ᴄʟɪᴄᴋ ʙᴇʟᴏᴡ ᴛᴏ ᴘʀᴏᴄᴇᴇᴅ</b>",
+                "<b><blockquote expandable>Here is your link! Click below to proceed</b>",
                 reply_markup=button,
                 parse_mode=ParseMode.HTML
             )
@@ -109,8 +110,7 @@ async def start_command(client: Bot, message: Message):
                 "<u><b>Note: If the link is expired, click the post link again to get a new one.</b></u>",
                 parse_mode=ParseMode.HTML
             )
-
-            asyncio.create_task(delete_after_delay(note_msg, 300))
+            delete_after_delay(note_msg, 300)
             asyncio.create_task(revoke_invite_after_5_minutes(client, channel_id, invite.invite_link, is_request))
 
         except Exception as e:
@@ -119,10 +119,11 @@ async def start_command(client: Bot, message: Message):
                 parse_mode=ParseMode.HTML
             )
             print(f"Decoding error: {e}")
+
     else:
         inline_buttons = InlineKeyboardMarkup([
-            [InlineKeyboardButton("• ᴀʙᴏᴜᴛ", callback_data="about"),
-             InlineKeyboardButton("• ᴄʜᴀɴɴᴇʟs", callback_data="channels")],
+            [InlineKeyboardButton("• About", callback_data="about"),
+             InlineKeyboardButton("• Channels", callback_data="channels")],
             [InlineKeyboardButton("• Close •", callback_data="close")]
         ])
         try:
@@ -143,17 +144,14 @@ async def start_command(client: Bot, message: Message):
 @Bot.on_callback_query()
 async def cb_handler(client: Bot, query: CallbackQuery):
     data = query.data
-
     if data == "close":
         await query.answer()
         try:
             await query.message.delete()
         except:
             pass
-
     elif data in ["about", "channels"]:
         try:
-            # simple progress animation
             await query.message.edit_text("● ◌ ◌")
             await asyncio.sleep(0.3)
             await query.message.edit_text("● ● ◌")
@@ -162,24 +160,17 @@ async def cb_handler(client: Bot, query: CallbackQuery):
             await asyncio.sleep(0.2)
         except:
             pass
-
-        if data == "about":
-            await query.message.edit_media(
-                media=InputMediaPhoto(media="https://envs.sh/Wdj.jpg", caption=ABOUT_TXT),
-                reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('• ʙᴀᴄᴋ', callback_data='start'),
-                                                   InlineKeyboardButton('ᴄʟᴏsᴇ •', callback_data='close')]])
-            )
-        else:
-            await query.message.edit_media(
-                media=InputMediaPhoto(media="https://envs.sh/Wdj.jpg", caption=CHANNELS_TXT),
-                reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('• ʙᴀᴄᴋ', callback_data='start'),
-                                                   InlineKeyboardButton('home•', callback_data='setting')]])
-            )
-
+        caption = ABOUT_TXT if data == "about" else CHANNELS_TXT
+        back_button = 'start' if data == "about" else 'setting'
+        await query.message.edit_media(
+            media=InputMediaPhoto(media="https://envs.sh/Wdj.jpg", caption=caption),
+            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('• Back', callback_data='start'),
+                                               InlineKeyboardButton('• Close', callback_data='close')]])
+        )
     elif data in ["start", "home"]:
         inline_buttons = InlineKeyboardMarkup([
-            [InlineKeyboardButton("• ᴀʙᴏᴜᴛ", callback_data="about"),
-             InlineKeyboardButton("• ᴄʜᴀɴɴᴇʟs", callback_data="channels")],
+            [InlineKeyboardButton("• About", callback_data="about"),
+             InlineKeyboardButton("• Channels", callback_data="channels")],
             [InlineKeyboardButton("• Close •", callback_data="close")]
         ])
         try:
@@ -187,60 +178,40 @@ async def cb_handler(client: Bot, query: CallbackQuery):
                 media=InputMediaPhoto(media=START_PIC, caption=START_MSG),
                 reply_markup=inline_buttons
             )
-            await query.message.edit_caption(
-                caption=START_MSG,
-                parse_mode=ParseMode.HTML
-            )
+            await query.message.edit_caption(caption=START_MSG, parse_mode=ParseMode.HTML)
         except:
-            await query.message.edit_text(
-                text=START_MSG,
-                reply_markup=inline_buttons,
-                parse_mode=ParseMode.HTML
-            )
+            await query.message.edit_text(text=START_MSG, reply_markup=inline_buttons, parse_mode=ParseMode.HTML)
 
 # ========================= SPAM MONITOR ========================= #
-MAX_MESSAGES = 3  # Maximum messages allowed in the time window
-TIME_WINDOW = timedelta(seconds=10)  # Time window for counting messages
-BAN_DURATION = timedelta(hours=1)  # Temporary ban duration
+MAX_MESSAGES = 3
+TIME_WINDOW = timedelta(seconds=10)
+BAN_DURATION = timedelta(hours=1)
 
 @Bot.on_message(filters.private)
 async def monitor_messages(client: Bot, message: Message):
     user_id = message.from_user.id
     now = datetime.now()
 
-    # Ignore commands
     if message.text and message.text.startswith("/"):
         return
-
-    # Ignore admins/owners
     if user_id in ADMINS:
         return
-
-    # Check if user is currently banned
     if user_id in user_banned_until and now < user_banned_until[user_id]:
         await message.reply_text(
-            "<b><blockquote expandable>You are temporarily banned from using commands due to spamming. Try again later.</b>",
+            "<b>You are temporarily banned from sending messages due to spam. Try later.</b>",
             parse_mode=ParseMode.HTML
         )
         return
 
-    # Initialize message tracking
     if user_id not in user_message_count:
         user_message_count[user_id] = []
-
-    # Add current message timestamp
     user_message_count[user_id].append(now)
+    user_message_count[user_id] = [t for t in user_message_count[user_id] if now - t <= TIME_WINDOW]
 
-    # Keep only timestamps within TIME_WINDOW
-    user_message_count[user_id] = [
-        t for t in user_message_count[user_id] if now - t <= TIME_WINDOW
-    ]
-
-    # Ban user if they exceed MAX_MESSAGES
     if len(user_message_count[user_id]) > MAX_MESSAGES:
         user_banned_until[user_id] = now + BAN_DURATION
         await message.reply_text(
-            "<b><blockquote expandable>You are temporarily banned from using commands due to spamming. Try again later.</b>",
+            "<b>You are temporarily banned from sending messages due to spam. Try later.</b>",
             parse_mode=ParseMode.HTML
         )
         return
