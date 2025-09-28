@@ -145,6 +145,7 @@ async def start_command(client: Bot, message: Message):
 async def cb_handler(client: Bot, query: CallbackQuery):
     data = query.data
 
+    # Close button
     if data == "close":
         await query.answer()
         try:
@@ -153,27 +154,34 @@ async def cb_handler(client: Bot, query: CallbackQuery):
             pass
         return
 
+    # About / Channels with dot animation
     elif data in ["about", "channels"]:
-        # Dot animation before showing content
         try:
+            # Animate dots safely
             for i in range(1, 4):
-                await query.message.edit_text("● " * i + "○ " * (3 - i))
-                await asyncio.sleep(0.1)
+                dots = "● " * i + "○ " * (3 - i)
+                await query.message.edit_text(dots)
+                await asyncio.sleep(0.3)
         except:
-            pass
+            pass  # Ignore if edit fails
 
-        # Show the actual content after animation
+        # Show final content
         caption = ABOUT_TXT if data == "about" else CHANNELS_TXT
-        back_button = 'start'  # always go back to start
         inline_buttons = InlineKeyboardMarkup([
             [InlineKeyboardButton('• Back', callback_data='start'),
              InlineKeyboardButton('• Close', callback_data='close')]
         ])
-        await query.message.edit_media(
-            media=InputMediaPhoto(media="https://envs.sh/Wdj.jpg", caption=caption),
-            reply_markup=inline_buttons
-        )
+        try:
+            # Only try edit_media if message supports media
+            await query.message.edit_media(
+                media=InputMediaPhoto(media="https://envs.sh/Wdj.jpg", caption=caption),
+                reply_markup=inline_buttons
+            )
+        except:
+            # Fallback to edit_text if edit_media fails
+            await query.message.edit_text(text=caption, reply_markup=inline_buttons)
 
+    # Start / Home button
     elif data in ["start", "home"]:
         inline_buttons = InlineKeyboardMarkup([
             [InlineKeyboardButton("• About", callback_data="about"),
@@ -185,11 +193,11 @@ async def cb_handler(client: Bot, query: CallbackQuery):
                 media=InputMediaPhoto(media=START_PIC, caption=START_MSG),
                 reply_markup=inline_buttons
             )
-            await query.message.edit_caption(caption=START_MSG, parse_mode=ParseMode.HTML)
         except:
+            # Fallback if edit_media fails
             await query.message.edit_text(
-                text=START_MSG, 
-                reply_markup=inline_buttons, 
+                text=START_MSG,
+                reply_markup=inline_buttons,
                 parse_mode=ParseMode.HTML
             )
 
