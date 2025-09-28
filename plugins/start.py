@@ -142,26 +142,28 @@ async def cb_handler(client: Client, query: CallbackQuery):
         return
 
     elif data in ["about", "channels"]:
-        # Buttons for final message
         buttons = [
             [InlineKeyboardButton('• Back', callback_data='start'),
              InlineKeyboardButton('• Close •', callback_data='close')]
         ]
+        caption = ABOUT_TXT if data == "about" else CHANNELS_TXT
 
-        # Dot animation
+        # 1️⃣ If the message has media, replace with a text placeholder
         try:
-            for i in range(1, 4):
-                dots = "● " * i + "○ " * (3 - i)
-                await query.message.edit_text(
-                    text=dots,
-                    reply_markup=None  # No buttons during animation
-                )
-                await asyncio.sleep(0.1)
+            await query.message.edit_text("● ○ ○")
         except:
             pass
 
-        # After animation, show final media + text
-        caption = ABOUT_TXT if data == "about" else CHANNELS_TXT
+        # 2️⃣ Dot animation
+        try:
+            for i in range(1, 4):
+                dots = "● " * i + "○ " * (3 - i)
+                await query.message.edit_text(dots)
+                await asyncio.sleep(0.3)
+        except:
+            pass
+
+        # 3️⃣ Replace placeholder with final photo + caption
         try:
             await client.edit_message_media(
                 chat_id=query.message.chat.id,
@@ -173,7 +175,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 reply_markup=InlineKeyboardMarkup(buttons)
             )
         except:
-            # Fallback if edit_media fails
+            # fallback if edit_media fails
             await query.message.edit_text(
                 text=caption,
                 reply_markup=InlineKeyboardMarkup(buttons),
@@ -181,12 +183,20 @@ async def cb_handler(client: Client, query: CallbackQuery):
             )
 
     elif data in ["start", "home"]:
-        # Buttons for start/home
         buttons = [
             [InlineKeyboardButton("• About", callback_data="about"),
              InlineKeyboardButton("• Channels", callback_data="channels")],
             [InlineKeyboardButton("• Close •", callback_data="close")]
         ]
+
+        # Text-only placeholder
+        try:
+            await query.message.edit_text("Loading...")
+        except:
+            pass
+
+        await asyncio.sleep(0.2)  # small delay for smooth transition
+
         try:
             await client.edit_message_media(
                 chat_id=query.message.chat.id,
@@ -202,7 +212,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 text=START_MSG,
                 reply_markup=InlineKeyboardMarkup(buttons),
                 parse_mode=ParseMode.HTML
-            )
+        )
 
 # ========================= SPAM MONITOR ========================= #
 @Client.on_message(filters.private)
