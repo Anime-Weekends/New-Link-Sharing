@@ -142,43 +142,65 @@ async def cb_handler(client: Client, query: CallbackQuery):
         return
 
     elif data in ["about", "channels"]:
+        # Buttons for final message
+        buttons = [
+            [InlineKeyboardButton('• Back', callback_data='start'),
+             InlineKeyboardButton('• Close •', callback_data='close')]
+        ]
+
+        # Dot animation
         try:
-            # Dot animation
-            dots = ["● ○ ○", "● ● ○", "● ● ●"]
-            for d in dots:
-                await query.message.edit_text(d)
-                await asyncio.sleep(0.3)
+            for i in range(1, 4):
+                dots = "● " * i + "○ " * (3 - i)
+                await query.message.edit_text(
+                    text=dots,
+                    reply_markup=None  # No buttons during animation
+                )
+                await asyncio.sleep(0.1)
         except:
             pass
 
+        # After animation, show final media + text
         caption = ABOUT_TXT if data == "about" else CHANNELS_TXT
-        inline_buttons = InlineKeyboardMarkup([
-            [InlineKeyboardButton('• Back', callback_data='start'),
-             InlineKeyboardButton('• Close •', callback_data='close')]
-        ])
         try:
-            await query.message.edit_media(
-                InputMediaPhoto("https://envs.sh/Wdj.jpg", caption),
-                reply_markup=inline_buttons
+            await client.edit_message_media(
+                chat_id=query.message.chat.id,
+                message_id=query.message.id,
+                media=InputMediaPhoto(
+                    media="https://envs.sh/Wdj.jpg",
+                    caption=caption
+                ),
+                reply_markup=InlineKeyboardMarkup(buttons)
             )
         except:
-            await query.message.edit_text(caption, reply_markup=inline_buttons)
+            # Fallback if edit_media fails
+            await query.message.edit_text(
+                text=caption,
+                reply_markup=InlineKeyboardMarkup(buttons),
+                parse_mode=ParseMode.HTML
+            )
 
     elif data in ["start", "home"]:
-        inline_buttons = InlineKeyboardMarkup([
+        # Buttons for start/home
+        buttons = [
             [InlineKeyboardButton("• About", callback_data="about"),
              InlineKeyboardButton("• Channels", callback_data="channels")],
             [InlineKeyboardButton("• Close •", callback_data="close")]
-        ])
+        ]
         try:
-            await query.message.edit_media(
-                InputMediaPhoto(START_PIC, START_MSG),
-                reply_markup=inline_buttons
+            await client.edit_message_media(
+                chat_id=query.message.chat.id,
+                message_id=query.message.id,
+                media=InputMediaPhoto(
+                    media=START_PIC,
+                    caption=START_MSG
+                ),
+                reply_markup=InlineKeyboardMarkup(buttons)
             )
         except:
             await query.message.edit_text(
-                START_MSG,
-                reply_markup=inline_buttons,
+                text=START_MSG,
+                reply_markup=InlineKeyboardMarkup(buttons),
                 parse_mode=ParseMode.HTML
             )
 
