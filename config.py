@@ -1,9 +1,6 @@
-# ╔════════════════════════════════════════════════════════╗
-# ║                Telegram Link Sharing Bot               ║
-# ║  Secure Channel Link Sharing | Developed by @RexySama    ║
-# ║                                                        ║
-# ║  ⚠️ Please do not remove credits, respect developers.   ║
-# ╚════════════════════════════════════════════════════════╝
+# ✦━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━✦
+#     ✧ R ᴇ x ʏ   -   レクシィ   -   Dᴇᴠ ✧
+# ✦━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━✦
 
 import os
 from os import environ
@@ -133,3 +130,7 @@ logging.getLogger("pyrogram").setLevel(logging.WARNING)
 
 def LOGGER(name: str) -> logging.Logger:
     return logging.getLogger(name)
+
+# ✦━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━✦
+#     ✧ R ᴇ x ʏ   -   レクシィ   -   Dᴇᴠ ✧
+# ✦━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━✦
