@@ -1,19 +1,18 @@
+
+
 import asyncio
-from datetime import datetime, timedelta
+import base64
+import time
+from collections import defaultdict
 from pyrogram import Client, filters
 from pyrogram.enums import ParseMode
-from pyrogram.types import (
-    Message,
-    InlineKeyboardMarkup,
-    InlineKeyboardButton,
-    CallbackQuery,
-    InputMediaPhoto
-)
+from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery, InputMediaPhoto
 
-from config import START_MSG, START_PIC, ABOUT_TXT, CHANNELS_TXT
-from database.database import add_user, get_current_invite_link, get_original_link, get_channel_by_encoded_link, get_channel_by_encoded_link2
+from datetime import datetime, timedelta
+from config import *
+from database.database import *
 from plugins.newpost import revoke_invite_after_5_minutes
-from helper_func import delete_after_delay
+from helper_func import *
 
 # ========================= GLOBALS ========================= #
 user_message_count = {}
