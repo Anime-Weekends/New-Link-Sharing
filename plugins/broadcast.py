@@ -1,20 +1,16 @@
 # ✦━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━✦
-#     ✧ R ᴇ x y   -   レクシィ   -   Dᴇᴠ ✧
+#     ✧ R e x y   -   レクシィ   -   D e v ✧
 # ✦━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━✦
 
 import asyncio
-from datetime import datetime, timedelta
 from pyrogram import Client as Bot, filters
 from pyrogram.types import Message
 from pyrogram.enums import ParseMode
 from pyrogram.errors import FloodWait, UserIsBlocked, InputUserDeactivated
-from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 # --------------------- GLOBALS --------------------- #
-
 is_canceled = False
 cancel_lock = asyncio.Lock()
-
 user_message_count = {}
 user_banned_until = {}
 user_database = set()  # store chat_ids for broadcasting
@@ -22,7 +18,6 @@ user_database = set()  # store chat_ids for broadcasting
 REPLY_ERROR = "<code>Use this command as a reply to any Telegram message.</code>"
 
 # ------------------- BROADCAST HELPERS ------------------- #
-
 async def full_userbase():
     """Return all chat IDs for broadcasting"""
     return list(user_database)
@@ -31,11 +26,13 @@ async def del_user(chat_id):
     """Remove a user from the broadcast database"""
     user_database.discard(chat_id)
 
-def is_owner_or_admin(_, __, message):
+# Custom filter for owner/admins (ADMINS comes from your config)
+def owner_filter(_, __, message: Message):
     return message.from_user and message.from_user.id in ADMINS
 
-# ------------------- BROADCAST COMMAND ------------------- #
+is_owner_or_admin = filters.create(owner_filter)
 
+# ------------------- BROADCAST COMMAND ------------------- #
 @Bot.on_message(filters.command('broadcast') & filters.private & is_owner_or_admin)
 async def send_text(client: Bot, message: Message):
     global is_canceled
@@ -64,7 +61,7 @@ async def send_text(client: Bot, message: Message):
     deleted = 0
     unsuccessful = 0
 
-    pls_wait = await message.reply("<i>Broadcasting message... This may take time.</i>", parse_mode=ParseMode.HTML)
+    pls_wait = await message.reply("<i>Broadcasting message... This may take some time.</i>", parse_mode=ParseMode.HTML)
 
     bar_length = 20
     final_progress_bar = "●" * bar_length
@@ -98,11 +95,9 @@ async def send_text(client: Bot, message: Message):
             unsuccessful += 1
 
         percent_complete = i / total
-
         if percent_complete - last_update_percentage >= update_interval or last_update_percentage == 0:
             num_blocks = int(percent_complete * bar_length)
             progress_bar = "●" * num_blocks + "○" * (bar_length - num_blocks)
-
             status_update = f"""<b>🤖 {broad_mode}Broadcast in Progress...
 
 Progress: [{progress_bar}] {percent_complete:.0%}
@@ -128,6 +123,10 @@ Deleted Accounts: {deleted}
 Unsuccessful: {unsuccessful}</b>"""
     await pls_wait.edit(final_status, parse_mode=ParseMode.HTML)
 
-# ✦━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━✦
-#     ✧ R ᴇ x ʏ   -   レクシィ   -   Dᴇᴠ ✧
-# ✦━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━✦
+# ------------------- CANCEL COMMAND ------------------- #
+@Bot.on_message(filters.command('cancel') & filters.private & is_owner_or_admin)
+async def cancel_broadcast(_, message: Message):
+    global is_canceled
+    async with cancel_lock:
+        is_canceled = True
+    await message.reply_text("<b>Broadcast has been canceled ✅</b>", parse_mode=ParseMode.HTML)
