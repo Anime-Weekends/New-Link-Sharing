@@ -142,28 +142,26 @@ async def cb_handler(client: Client, query: CallbackQuery):
         return
 
     elif data in ["about", "channels"]:
+        # Buttons for final message
         buttons = [
             [InlineKeyboardButton('• Back', callback_data='start'),
              InlineKeyboardButton('• Close •', callback_data='close')]
         ]
-        caption = ABOUT_TXT if data == "about" else CHANNELS_TXT
 
-        # 1️⃣ If the message has media, replace with a text placeholder
-        try:
-            await query.message.edit_text("● ○ ○")
-        except:
-            pass
-
-        # 2️⃣ Dot animation
+        # Dot animation
         try:
             for i in range(1, 4):
                 dots = "● " * i + "○ " * (3 - i)
-                await query.message.edit_text(dots)
+                await query.message.edit_text(
+                    text=dots,
+                    reply_markup=None  # No buttons during animation
+                )
                 await asyncio.sleep(0.3)
         except:
             pass
 
-        # 3️⃣ Replace placeholder with final photo + caption
+        # After animation, show final media + text
+        caption = ABOUT_TXT if data == "about" else CHANNELS_TXT
         try:
             await client.edit_message_media(
                 chat_id=query.message.chat.id,
@@ -175,7 +173,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 reply_markup=InlineKeyboardMarkup(buttons)
             )
         except:
-            # fallback if edit_media fails
+            # Fallback if edit_media fails
             await query.message.edit_text(
                 text=caption,
                 reply_markup=InlineKeyboardMarkup(buttons),
@@ -183,20 +181,12 @@ async def cb_handler(client: Client, query: CallbackQuery):
             )
 
     elif data in ["start", "home"]:
+        # Buttons for start/home
         buttons = [
             [InlineKeyboardButton("• About", callback_data="about"),
              InlineKeyboardButton("• Channels", callback_data="channels")],
             [InlineKeyboardButton("• Close •", callback_data="close")]
         ]
-
-        # Text-only placeholder
-        try:
-            await query.message.edit_text("Loading...")
-        except:
-            pass
-
-        await asyncio.sleep(0.2)  # small delay for smooth transition
-
         try:
             await client.edit_message_media(
                 chat_id=query.message.chat.id,
