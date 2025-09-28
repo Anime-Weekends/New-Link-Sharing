@@ -393,10 +393,10 @@ async def monitor_messages(client: Bot, message: Message):
 
 """
 
+
 @Bot.on_callback_query()
 async def cb_handler(client: Bot, query: CallbackQuery):
-    data = query.data  
-    chat_id = query.message.chat.id
+    data = query.data
 
     if data == "close":
         await query.message.delete()
@@ -425,14 +425,18 @@ async def cb_handler(client: Bot, query: CallbackQuery):
             await query.edit_message_media(
                 media=InputMediaPhoto(
                     media="https://envs.sh/Wdj.jpg",
-                    caption=ABOUT_TXT,
-                    parse_mode=ParseMode.HTML
+                    caption=ABOUT_TXT
                 ),
                 reply_markup=InlineKeyboardMarkup([
                     [InlineKeyboardButton('• ʙᴀᴄᴋ', callback_data='start'),
                      InlineKeyboardButton('ᴄʟᴏsᴇ •', callback_data='close')]
                 ])
             )
+            await query.edit_message_caption(
+                caption=ABOUT_TXT,
+                parse_mode=ParseMode.HTML
+            )
+
         else:  # channels
             user = await client.get_users(OWNER_ID)
             user_link = f"https://t.me/{user.username}" if user.username else f"tg://openmessage?user_id={OWNER_ID}"
@@ -441,13 +445,16 @@ async def cb_handler(client: Bot, query: CallbackQuery):
             await query.edit_message_media(
                 media=InputMediaPhoto(
                     media="https://envs.sh/Wdj.jpg",
-                    caption=CHANNELS_TXT,
-                    parse_mode=ParseMode.HTML
+                    caption=CHANNELS_TXT
                 ),
                 reply_markup=InlineKeyboardMarkup([
                     [InlineKeyboardButton('• ʙᴀᴄᴋ', callback_data='start'),
                      InlineKeyboardButton('home•', callback_data='setting')]
                 ])
+            )
+            await query.edit_message_caption(
+                caption=CHANNELS_TXT,
+                parse_mode=ParseMode.HTML
             )
 
     elif data in ["start", "home"]:
@@ -460,10 +467,13 @@ async def cb_handler(client: Bot, query: CallbackQuery):
             await query.edit_message_media(
                 media=InputMediaPhoto(
                     media=START_PIC,
-                    caption=START_MSG,
-                    parse_mode=ParseMode.HTML
+                    caption=START_MSG
                 ),
                 reply_markup=inline_buttons
+            )
+            await query.edit_message_caption(
+                caption=START_MSG,
+                parse_mode=ParseMode.HTML
             )
         except Exception as e:
             print(f"Error sending start/home photo: {e}")
