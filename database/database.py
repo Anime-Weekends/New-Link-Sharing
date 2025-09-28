@@ -207,3 +207,30 @@ async def set_channel_mode(channel_id: int, mode: str):
         await fsub_channels_collection.update_one({'channel_id': channel_id}, {'$set': {'mode': mode}}, upsert=True)
     except Exception as e:
         print(f"Error setting FSub channel mode {channel_id}: {e}")
+
+# ----------------- APPROVAL MANAGEMENT ----------------- #
+async def set_approval_off(channel_id: int, off: bool = True) -> bool:
+    """Set approval_off flag for a channel."""
+    if not isinstance(channel_id, int):
+        return False
+    try:
+        await channels_collection.update_one(
+            {"channel_id": channel_id},
+            {"$set": {"approval_off": off}},
+            upsert=True
+        )
+        return True
+    except Exception as e:
+        print(f"Error setting approval_off for channel {channel_id}: {e}")
+        return False
+
+async def is_approval_off(channel_id: int) -> bool:
+    """Check if approval_off flag is set for a channel."""
+    if not isinstance(channel_id, int):
+        return False
+    try:
+        channel = await channels_collection.find_one({"channel_id": channel_id})
+        return bool(channel and channel.get("approval_off", False))
+    except Exception as e:
+        print(f"Error checking approval_off for channel {channel_id}: {e}")
+        return False
