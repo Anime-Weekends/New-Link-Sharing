@@ -144,29 +144,36 @@ async def start_command(client: Bot, message: Message):
 @Bot.on_callback_query()
 async def cb_handler(client: Bot, query: CallbackQuery):
     data = query.data
+
     if data == "close":
         await query.answer()
         try:
             await query.message.delete()
         except:
             pass
+        return
+
     elif data in ["about", "channels"]:
+        # Dot animation before showing content
         try:
-            await query.message.edit_text("● ◌ ◌")
-            await asyncio.sleep(0.3)
-            await query.message.edit_text("● ● ◌")
-            await asyncio.sleep(0.3)
-            await query.message.edit_text("● ● ●")
-            await asyncio.sleep(0.2)
+            for i in range(1, 4):
+                await query.message.edit_text("● " * i + "○ " * (3 - i))
+                await asyncio.sleep(0.1)
         except:
             pass
+
+        # Show the actual content after animation
         caption = ABOUT_TXT if data == "about" else CHANNELS_TXT
-        back_button = 'start' if data == "about" else 'setting'
+        back_button = 'start'  # always go back to start
+        inline_buttons = InlineKeyboardMarkup([
+            [InlineKeyboardButton('• Back', callback_data='start'),
+             InlineKeyboardButton('• Close', callback_data='close')]
+        ])
         await query.message.edit_media(
             media=InputMediaPhoto(media="https://envs.sh/Wdj.jpg", caption=caption),
-            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('• Back', callback_data='start'),
-                                               InlineKeyboardButton('• Close', callback_data='close')]])
+            reply_markup=inline_buttons
         )
+
     elif data in ["start", "home"]:
         inline_buttons = InlineKeyboardMarkup([
             [InlineKeyboardButton("• About", callback_data="about"),
@@ -180,7 +187,11 @@ async def cb_handler(client: Bot, query: CallbackQuery):
             )
             await query.message.edit_caption(caption=START_MSG, parse_mode=ParseMode.HTML)
         except:
-            await query.message.edit_text(text=START_MSG, reply_markup=inline_buttons, parse_mode=ParseMode.HTML)
+            await query.message.edit_text(
+                text=START_MSG, 
+                reply_markup=inline_buttons, 
+                parse_mode=ParseMode.HTML
+            )
 
 # ========================= SPAM MONITOR ========================= #
 MAX_MESSAGES = 3
