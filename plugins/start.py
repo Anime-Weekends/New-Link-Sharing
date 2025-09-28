@@ -397,18 +397,15 @@ async def monitor_messages(client: Bot, message: Message):
 async def cb_handler(client: Bot, query: CallbackQuery):
     data = query.data  
     chat_id = query.message.chat.id
-    
+
     if data == "close":
         await query.message.delete()
         try:
             await query.message.reply_to_message.delete()
         except:
             pass
-    
-    elif data in ["about", "channels"]:
-        # Show typing action
-        await client.send_chat_action(chat_id, ChatAction.TYPING)
 
+    elif data in ["about", "channels"]:
         # Show a simple "progress" animation
         try:
             await query.message.edit_text("● ◌ ◌")
@@ -419,61 +416,59 @@ async def cb_handler(client: Bot, query: CallbackQuery):
             await asyncio.sleep(0.2)
         except:
             pass  # In case message was deleted or can't edit
-        
+
         # Show the actual content
         if data == "about":
             user = await client.get_users(OWNER_ID)
             user_link = f"https://t.me/{user.username}" if user.username else f"tg://openmessage?user_id={OWNER_ID}"
-            
+
             await query.edit_message_media(
-                InputMediaPhoto(
-                    "https://envs.sh/Wdj.jpg",
-                    ABOUT_TXT
+                media=InputMediaPhoto(
+                    media="https://envs.sh/Wdj.jpg",
+                    caption=ABOUT_TXT,
+                    parse_mode=ParseMode.HTML
                 ),
                 reply_markup=InlineKeyboardMarkup([
                     [InlineKeyboardButton('• ʙᴀᴄᴋ', callback_data='start'),
                      InlineKeyboardButton('ᴄʟᴏsᴇ •', callback_data='close')]
-                ]),
+                ])
             )
         else:  # channels
             user = await client.get_users(OWNER_ID)
-            user_link = f"https://t.me/{user.username}" if user.username else f"tg://openmessage?user_id={OWNER_ID}" 
+            user_link = f"https://t.me/{user.username}" if user.username else f"tg://openmessage?user_id={OWNER_ID}"
             ownername = f"<a href={user_link}>{user.first_name}</a>" if user.first_name else f"<a href={user_link}>no name !</a>"
-            
+
             await query.edit_message_media(
-                InputMediaPhoto(
-                    "https://envs.sh/Wdj.jpg",
-                    CHANNELS_TXT
+                media=InputMediaPhoto(
+                    media="https://envs.sh/Wdj.jpg",
+                    caption=CHANNELS_TXT,
+                    parse_mode=ParseMode.HTML
                 ),
                 reply_markup=InlineKeyboardMarkup([
                     [InlineKeyboardButton('• ʙᴀᴄᴋ', callback_data='start'),
                      InlineKeyboardButton('home•', callback_data='setting')]
-                ]),
+                ])
             )
-    
-    elif data in ["start", "home"]:
-        # Show typing action
-        await client.send_chat_action(chat_id, ChatAction.TYPING)
 
-        inline_buttons = InlineKeyboardMarkup(
-            [
-                [InlineKeyboardButton("• ᴀʙᴏᴜᴛ", callback_data="about"),
-                 InlineKeyboardButton("• ᴄʜᴀɴɴᴇʟs", callback_data="channels")],
-                [InlineKeyboardButton("• Close •", callback_data="close")]
-            ]
-        )
+    elif data in ["start", "home"]:
+        inline_buttons = InlineKeyboardMarkup([
+            [InlineKeyboardButton("• ᴀʙᴏᴜᴛ", callback_data="about"),
+             InlineKeyboardButton("• ᴄʜᴀɴɴᴇʟs", callback_data="channels")],
+            [InlineKeyboardButton("• Close •", callback_data="close")]
+        ])
         try:
             await query.edit_message_media(
-                InputMediaPhoto(
-                    START_PIC,
-                    START_MSG
+                media=InputMediaPhoto(
+                    media=START_PIC,
+                    caption=START_MSG,
+                    parse_mode=ParseMode.HTML
                 ),
                 reply_markup=inline_buttons
             )
         except Exception as e:
             print(f"Error sending start/home photo: {e}")
             await query.edit_message_text(
-                START_MSG,
+                text=START_MSG,
                 reply_markup=inline_buttons,
                 parse_mode=ParseMode.HTML
             )
