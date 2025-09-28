@@ -1,10 +1,18 @@
+# ✦━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━✦
+#          Dependencies & Requirements 
+# ✦━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━✦
+
 pyrofork==2.3.59
-TgCrypto 
+TgCrypto
 pyromod
 python-dotenv
-pymongo 
-dnspython 
-motor 
+pymongo
+dnspython
+motor
 aiohttp
 asyncio
 aiofiles
+
+# ✦━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━✦
+#     ✧ R ᴇ x ʏ   -   レクシィ   -   Dᴇᴠ ✧
+# ✦━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━✦
