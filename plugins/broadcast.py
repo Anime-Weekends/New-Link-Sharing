@@ -8,7 +8,7 @@ from pyrogram import Client as Bot, filters
 from pyrogram.types import Message
 from pyrogram.enums import ParseMode
 from pyrogram.errors import FloodWait, UserIsBlocked, InputUserDeactivated
-from helpers import full_userbase, del_user  # adjust import
+from helper_func import full_userbase, del_user  # adjust import
 
 # Global variables
 is_canceled = False
