@@ -4,7 +4,7 @@ from pyrogram.enums import ChatMemberStatus, ChatType
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, ChatMemberUpdated
 
 from config import OWNER_ID  # your owner/admin ID(s)
-from database.database import db  # your db instance
+from database.database import *
 from helper_func import *
 
 # ========================= FORCE-SUB MODE ========================= #
