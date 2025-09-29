@@ -3,9 +3,9 @@ from pyrogram import Client, filters
 from pyrogram.enums import ChatMemberStatus, ChatType
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, ChatMemberUpdated
 from database.database import (
-    add_channel,
-    del_channel,
-    show_channels,
+    save_channel,
+    remove_channel,
+    get_channels,
     get_channel_mode,
     reqChannel_exist,
     req_user,
@@ -21,7 +21,7 @@ from config import OWNER_ID
 @Client.on_message(filters.command('fsub_mode') & filters.private & filters.user(OWNER_ID))
 async def change_force_sub_mode(client: Client, message: Message):
     temp = await message.reply("<b><i>Wait a sec...</i></b>", quote=True)
-    channels = await show_channels()
+    channels = await get_channels()
 
     if not channels:
         return await temp.edit("<b>❌ No force-sub channels found.</b>")
@@ -83,7 +83,7 @@ async def add_force_sub(client: Client, message: Message):
     except ValueError:
         return await temp.edit("❌ Invalid chat ID!")
 
-    all_chats = await show_channels()
+    all_chats = await get_channels()
     if chat_id in [c if isinstance(c, int) else c["_id"] for c in all_chats]:
         return await temp.edit(f"Already exists:\n<code>{chat_id}</code>")
 
@@ -101,7 +101,7 @@ async def add_force_sub(client: Client, message: Message):
         except Exception:
             link = f"https://t.me/{chat.username}" if chat.username else f"https://t.me/c/{str(chat.id)[4:]}"
 
-        await add_channel(chat_id)
+        await save_channel(chat_id)
         await temp.edit(
             f"✅ Added Successfully!\n\n"
             f"<b>Name:</b> <a href='{link}'>{chat.title}</a>\n"
@@ -116,7 +116,7 @@ async def add_force_sub(client: Client, message: Message):
 async def del_force_sub(client: Client, message: Message):
     temp = await message.reply("<b><i>Wait a sec...</i></b>", quote=True)
     args = message.text.split(maxsplit=1)
-    all_channels = await show_channels()
+    all_channels = await get_channels()
 
     if len(args) != 2:
         return await temp.edit("<b>Usage:</b> <code>/delchnl <channel_id | all></code>")
@@ -126,7 +126,7 @@ async def del_force_sub(client: Client, message: Message):
             return await temp.edit("<b>❌ No force-sub channels found.</b>")
         for ch_id in all_channels:
             ch_id_val = ch_id["_id"] if isinstance(ch_id, dict) else ch_id
-            await del_channel(ch_id_val)
+            await remove_channel(ch_id_val)
         return await temp.edit("<b>✅ All force-sub channels have been removed.</b>")
 
     try:
@@ -135,7 +135,7 @@ async def del_force_sub(client: Client, message: Message):
         return await temp.edit("<b>❌ Invalid Channel ID</b>")
 
     if ch_id in [c["_id"] if isinstance(c, dict) else c for c in all_channels]:
-        await del_channel(ch_id)
+        await remove_channel(ch_id)
         await temp.edit(f"<b>✅ Channel removed:</b> <code>{ch_id}</code>")
     else:
         await temp.edit(f"<b>❌ Channel not found in force-sub list:</b> <code>{ch_id}</code>")
@@ -144,7 +144,7 @@ async def del_force_sub(client: Client, message: Message):
 @Client.on_message(filters.command('listchnl') & filters.private & filters.user(OWNER_ID))
 async def list_force_sub_channels(client: Client, message: Message):
     temp = await message.reply("<b><i>Wait a sec...</i></b>", quote=True)
-    channels = await show_channels()
+    channels = await get_channels()
 
     if not channels:
         return await temp.edit("<b>❌ No force-sub channels found.</b>")
@@ -209,4 +209,4 @@ async def delete_requested_users(client: Client, message: Message):
         f"🗑️ Removed leftover non-request users: `{removed}`\n"
         f"✅ Still members: `{skipped}`",
         quote=True
-)
+        )
