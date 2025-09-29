@@ -3,25 +3,25 @@ from pyrogram import Client, filters
 from pyrogram.enums import ChatMemberStatus, ChatType
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, ChatMemberUpdated
 from database.database import (
-    show_channels,
     add_channel,
     del_channel,
+    show_channels,
     get_channel_mode,
     reqChannel_exist,
+    req_user,
     req_user_exist,
     del_req_user,
-    req_user,
     rqst_fsub_Channel_data
 )
 from config import OWNER_ID
 
+
 # ========================= FORCE-SUB MODE ========================= #
 
-# Toggle Force-Sub mode
 @Client.on_message(filters.command('fsub_mode') & filters.private & filters.user(OWNER_ID))
 async def change_force_sub_mode(client: Client, message: Message):
     temp = await message.reply("<b><i>Wait a sec...</i></b>", quote=True)
-    channels = await show_channels()  # call function directly
+    channels = await show_channels()
 
     if not channels:
         return await temp.edit("<b>❌ No force-sub channels found.</b>")
@@ -45,6 +45,7 @@ async def change_force_sub_mode(client: Client, message: Message):
         disable_web_page_preview=True
     )
 
+
 # ========================= MEMBERSHIP HANDLERS ========================= #
 
 @Client.on_chat_member_updated()
@@ -57,6 +58,7 @@ async def handle_chat_members(client, chat_member_updated: ChatMemberUpdated):
             if await req_user_exist(chat_id, user_id):
                 await del_req_user(chat_id, user_id)
 
+
 @Client.on_chat_join_request()
 async def handle_join_request(client, chat_join_request):
     chat_id = chat_join_request.chat.id
@@ -64,6 +66,7 @@ async def handle_join_request(client, chat_join_request):
     if await reqChannel_exist(chat_id):
         if not await req_user_exist(chat_id, user_id):
             await req_user(chat_id, user_id)
+
 
 # ========================= CHANNEL MANAGEMENT ========================= #
 
@@ -108,6 +111,7 @@ async def add_force_sub(client: Client, message: Message):
     except Exception as e:
         await temp.edit(f"❌ Failed to add chat:\n<code>{chat_id}</code>\n\n<i>{e}</i>")
 
+
 @Client.on_message(filters.command('delchnl') & filters.private & filters.user(OWNER_ID))
 async def del_force_sub(client: Client, message: Message):
     temp = await message.reply("<b><i>Wait a sec...</i></b>", quote=True)
@@ -136,6 +140,7 @@ async def del_force_sub(client: Client, message: Message):
     else:
         await temp.edit(f"<b>❌ Channel not found in force-sub list:</b> <code>{ch_id}</code>")
 
+
 @Client.on_message(filters.command('listchnl') & filters.private & filters.user(OWNER_ID))
 async def list_force_sub_channels(client: Client, message: Message):
     temp = await message.reply("<b><i>Wait a sec...</i></b>", quote=True)
@@ -156,6 +161,7 @@ async def list_force_sub_channels(client: Client, message: Message):
 
     await temp.edit(result, disable_web_page_preview=True,
                     reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Close ✖️", callback_data="close")]]))
+
 
 @Client.on_message(filters.command('delreq') & filters.private & filters.user(OWNER_ID))
 async def delete_requested_users(client: Client, message: Message):
