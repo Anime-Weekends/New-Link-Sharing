@@ -1,16 +1,26 @@
-
-
 import asyncio
 import base64
-import time
-from collections import defaultdict
-from pyrogram import Client, filters
-from pyrogram.enums import ParseMode
-from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery, InputMediaPhoto
-
 from datetime import datetime, timedelta
+from pyrogram import Client, filters
+from pyrogram.enums import ParseMode, ChatMemberStatus
+from pyrogram.types import (
+    Message,
+    InlineKeyboardMarkup,
+    InlineKeyboardButton,
+    CallbackQuery,
+    InputMediaPhoto
+)
+
 from config import *
-from database.database import *
+from database.database import (
+    add_user,
+    get_channel_by_encoded_link,
+    get_channel_by_encoded_link2,
+    get_original_link,
+    get_current_invite_link,
+    save_invite_link,
+    get_fsub_channels
+)
 from plugins.newpost import revoke_invite_after_5_minutes
 from helper_func import *
 
@@ -38,6 +48,39 @@ async def start_command(client: Client, message: Message):
 
     await add_user(user_id)
 
+    # ================== FORCE-SUB CHECK ================== #
+    fsub_channels = await get_fsub_channels()
+    if fsub_channels:
+        not_joined = []
+        for ch_id in fsub_channels:
+            try:
+                member = await client.get_chat_member(ch_id, user_id)
+                if member.status not in [ChatMemberStatus.MEMBER, ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.OWNER]:
+                    not_joined.append(ch_id)
+            except:
+                not_joined.append(ch_id)
+
+        if not_joined:
+            buttons = []
+            for ch_id in not_joined:
+                try:
+                    chat = await client.get_chat(ch_id)
+                    if chat.username:
+                        url = f"https://t.me/{chat.username}"
+                    else:
+                        url = f"https://t.me/c/{str(chat.id)[4:]}"
+                    buttons.append([InlineKeyboardButton(chat.title, url=url)])
+                except:
+                    buttons.append([InlineKeyboardButton(str(ch_id), url=f"https://t.me/c/{str(ch_id)[4:]}")])
+            buttons.append([InlineKeyboardButton("✅ I Joined", callback_data="refresh_start")])
+
+            return await message.reply_text(
+                "<b>🚨 You must join the required channel(s) before using me.</b>",
+                reply_markup=InlineKeyboardMarkup(buttons),
+                parse_mode=ParseMode.HTML
+            )
+
+    # ================== START LOGIC ================== #
     text = message.text
     if len(text) > 7:
         try:
@@ -99,7 +142,9 @@ async def start_command(client: Client, message: Message):
                 parse_mode=ParseMode.HTML
             )
             delete_after_delay(note_msg, 300)
-            asyncio.create_task(revoke_invite_after_5_minutes(client, channel_id, invite.invite_link, is_request))
+            asyncio.create_task(
+                revoke_invite_after_5_minutes(client, channel_id, invite.invite_link, is_request)
+            )
 
         except Exception as e:
             await message.reply_text(
@@ -152,10 +197,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
         try:
             for i in range(1, 4):
                 dots = "● " * i + "○ " * (3 - i)
-                await query.message.edit_text(
-                    text=dots,
-                    reply_markup=None  # No buttons during animation
-                )
+                await query.message.edit_text(text=dots)
                 await asyncio.sleep(0.3)
         except:
             pass
@@ -173,14 +215,13 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 reply_markup=InlineKeyboardMarkup(buttons)
             )
         except:
-            # Fallback if edit_media fails
             await query.message.edit_text(
                 text=caption,
                 reply_markup=InlineKeyboardMarkup(buttons),
                 parse_mode=ParseMode.HTML
             )
 
-    elif data in ["start", "home"]:
+    elif data in ["start", "home", "refresh_start"]:
         # Buttons for start/home
         buttons = [
             [InlineKeyboardButton("• About", callback_data="about"),
@@ -202,7 +243,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 text=START_MSG,
                 reply_markup=InlineKeyboardMarkup(buttons),
                 parse_mode=ParseMode.HTML
-        )
+            )
 
 # ========================= SPAM MONITOR ========================= #
 @Client.on_message(filters.private)
