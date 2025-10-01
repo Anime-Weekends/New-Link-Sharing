@@ -49,11 +49,7 @@ async def start_command(client: Client, message: Message):
     await add_user(user_id)
 
     # ================== FORCE-SUB CHECK ================== #
-    try:
-        fsub_channels = await get_fsub_channels()
-    except Exception:
-        fsub_channels = []
-
+    fsub_channels = await get_fsub_channels()
     if fsub_channels:
         not_joined = []
         for ch_id in fsub_channels:
@@ -90,20 +86,12 @@ async def start_command(client: Client, message: Message):
         try:
             base64_string = text.split(" ", 1)[1]
             is_request = base64_string.startswith("req_")
+
             if is_request:
                 base64_string = base64_string[4:]
-
-            # Decode base64 safely
-            try:
-                decoded_bytes = base64.urlsafe_b64decode(base64_string + '==')
-                decoded_string = decoded_bytes.decode()
-            except Exception:
-                decoded_string = base64_string  # fallback if decoding fails
-
-            if is_request:
-                channel_id = await get_channel_by_encoded_link2(decoded_string)
+                channel_id = await get_channel_by_encoded_link2(base64_string)
             else:
-                channel_id = await get_channel_by_encoded_link(decoded_string)
+                channel_id = await get_channel_by_encoded_link(base64_string)
 
             if not channel_id:
                 return await message.reply_text(
@@ -129,28 +117,19 @@ async def start_command(client: Client, message: Message):
                 except:
                     pass
 
-            try:
-                invite = await client.create_chat_invite_link(
-                    chat_id=channel_id,
-                    expire_date=datetime.now() + timedelta(minutes=5),
-                    creates_join_request=is_request
-                )
-                await save_invite_link(channel_id, invite.invite_link, is_request)
-            except Exception:
-                return await message.reply_text(
-                    "<b>Unable to create invite link. Make sure I am admin in the channel.</b>",
-                    parse_mode=ParseMode.HTML
-                )
+            invite = await client.create_chat_invite_link(
+                chat_id=channel_id,
+                expire_date=datetime.now() + timedelta(minutes=5),
+                creates_join_request=is_request
+            )
+            await save_invite_link(channel_id, invite.invite_link, is_request)
 
             button_text = "• Request to Join •" if is_request else "• Join Channel •"
             button = InlineKeyboardMarkup([[InlineKeyboardButton(button_text, url=invite.invite_link)]])
 
             wait_msg = await message.reply_text("<b>Please wait...</b>", parse_mode=ParseMode.HTML)
             await asyncio.sleep(0.5)
-            try:
-                await wait_msg.delete()
-            except:
-                pass
+            await wait_msg.delete()
 
             await message.reply_text(
                 "<b>Here is your link! Click below to proceed</b>",
@@ -168,11 +147,11 @@ async def start_command(client: Client, message: Message):
             )
 
         except Exception as e:
-            print(f"Decoding error: {e}")
             await message.reply_text(
                 "<b>Invalid or expired invite link.</b>",
                 parse_mode=ParseMode.HTML
             )
+            print(f"Decoding error: {e}")
 
     else:
         inline_buttons = InlineKeyboardMarkup([
@@ -292,7 +271,6 @@ async def monitor_messages(client: Client, message: Message):
 
     if len(user_message_count[user_id]) > MAX_MESSAGES:
         user_banned_until[user_id] = now + BAN_DURATION
-        user_message_count[user_id] = []  # reset count after ban
         await message.reply_text(
             "<b>You are temporarily banned from sending messages due to spam. Try later.</b>",
             parse_mode=ParseMode.HTML
