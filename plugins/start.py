@@ -1,7 +1,6 @@
 import asyncio
 import base64
 from datetime import datetime, timedelta
-from pyrogram import Client, filters
 from pyrogram.enums import ParseMode, ChatMemberStatus
 from pyrogram.types import (
     Message,
@@ -12,6 +11,7 @@ from pyrogram.types import (
 )
 
 from config import *
+from bot import Bot
 from database.database import (
     add_user,
     get_channel_by_encoded_link,
@@ -23,6 +23,7 @@ from database.database import (
 )
 from plugins.newpost import revoke_invite_after_5_minutes
 from helper_func import *
+from bot import Bot  # <-- import your Bot class
 
 # ========================= GLOBALS ========================= #
 user_message_count = {}
@@ -34,12 +35,12 @@ TIME_WINDOW = timedelta(seconds=10)
 BAN_DURATION = timedelta(hours=1)
 
 # ========================= START COMMAND ========================= #
-@Client.on_message(filters.command("start") & filters.private)
-async def start_command(client: Client, message: Message):
+@Bot.on_message(filters.command("start") & filters.private)
+async def start_command(client: Bot, message: Message):
     user_id = message.from_user.id
     now = datetime.now()
 
-    # Check temporary ban
+    # Anti-spam temporary ban check
     if user_id in user_banned_until and now < user_banned_until[user_id]:
         return await message.reply_text(
             "<b>You are temporarily banned from using commands due to spamming. Try again later.</b>",
@@ -55,7 +56,11 @@ async def start_command(client: Client, message: Message):
         for ch_id in fsub_channels:
             try:
                 member = await client.get_chat_member(ch_id, user_id)
-                if member.status not in [ChatMemberStatus.MEMBER, ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.OWNER]:
+                if member.status not in [
+                    ChatMemberStatus.MEMBER,
+                    ChatMemberStatus.ADMINISTRATOR,
+                    ChatMemberStatus.OWNER
+                ]:
                     not_joined.append(ch_id)
             except:
                 not_joined.append(ch_id)
@@ -174,8 +179,8 @@ async def start_command(client: Client, message: Message):
             )
 
 # ========================= CALLBACK HANDLER ========================= #
-@Client.on_callback_query()
-async def cb_handler(client: Client, query: CallbackQuery):
+@Bot.on_callback_query()
+async def cb_handler(client: Bot, query: CallbackQuery):
     data = query.data
 
     if data == "close":
@@ -187,13 +192,11 @@ async def cb_handler(client: Client, query: CallbackQuery):
         return
 
     elif data in ["about", "channels"]:
-        # Buttons for final message
         buttons = [
             [InlineKeyboardButton('• Back', callback_data='start'),
              InlineKeyboardButton('• Close •', callback_data='close')]
         ]
 
-        # Dot animation
         try:
             for i in range(1, 4):
                 dots = "● " * i + "○ " * (3 - i)
@@ -202,7 +205,6 @@ async def cb_handler(client: Client, query: CallbackQuery):
         except:
             pass
 
-        # After animation, show final media + text
         caption = ABOUT_TXT if data == "about" else CHANNELS_TXT
         try:
             await client.edit_message_media(
@@ -222,7 +224,6 @@ async def cb_handler(client: Client, query: CallbackQuery):
             )
 
     elif data in ["start", "home", "refresh_start"]:
-        # Buttons for start/home
         buttons = [
             [InlineKeyboardButton("• About", callback_data="about"),
              InlineKeyboardButton("• Channels", callback_data="channels")],
@@ -246,8 +247,8 @@ async def cb_handler(client: Client, query: CallbackQuery):
             )
 
 # ========================= SPAM MONITOR ========================= #
-@Client.on_message(filters.private)
-async def monitor_messages(client: Client, message: Message):
+@Bot.on_message(filters.private)
+async def monitor_messages(client: Bot, message: Message):
     user_id = message.from_user.id
     now = datetime.now()
 
