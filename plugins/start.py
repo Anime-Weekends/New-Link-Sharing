@@ -39,7 +39,7 @@ async def start_command(client: Client, message: Message):
     user_id = message.from_user.id
     now = datetime.now()
 
-    # Check temporary ban
+    # Check temporary ban  
     if user_id in user_banned_until and now < user_banned_until[user_id]:
         return await message.reply_text(
             "<b>You are temporarily banned from using commands due to spamming. Try again later.</b>",
@@ -48,7 +48,7 @@ async def start_command(client: Client, message: Message):
 
     await add_user(user_id)
 
-    # ================== FORCE-SUB CHECK ================== #
+    # ================== FORCE-SUB CHECK ================== #  
     fsub_channels = await get_fsub_channels()
     if fsub_channels:
         not_joined = []
@@ -80,7 +80,7 @@ async def start_command(client: Client, message: Message):
                 parse_mode=ParseMode.HTML
             )
 
-    # ================== START LOGIC ================== #
+    # ================== START LOGIC ================== #  
     text = message.text
     if len(text) > 7:
         try:
@@ -187,11 +187,13 @@ async def cb_handler(client: Client, query: CallbackQuery):
         return
 
     elif data in ["about", "channels"]:
+        # Buttons for final message  
         buttons = [
             [InlineKeyboardButton('• Back', callback_data='start'),
              InlineKeyboardButton('• Close •', callback_data='close')]
         ]
 
+        # Dot animation  
         try:
             for i in range(1, 4):
                 dots = "● " * i + "○ " * (3 - i)
@@ -200,6 +202,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
         except:
             pass
 
+        # After animation, show final media + text  
         caption = ABOUT_TXT if data == "about" else CHANNELS_TXT
         try:
             await client.edit_message_media(
@@ -212,16 +215,14 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 reply_markup=InlineKeyboardMarkup(buttons)
             )
         except:
-            try:
-                await query.message.edit_text(
-                    text=caption,
-                    reply_markup=InlineKeyboardMarkup(buttons),
-                    parse_mode=ParseMode.HTML
-                )
-            except:
-                pass
+            await query.message.edit_text(
+                text=caption,
+                reply_markup=InlineKeyboardMarkup(buttons),
+                parse_mode=ParseMode.HTML
+            )
 
     elif data in ["start", "home", "refresh_start"]:
+        # Buttons for start/home  
         buttons = [
             [InlineKeyboardButton("• About", callback_data="about"),
              InlineKeyboardButton("• Channels", callback_data="channels")],
@@ -238,14 +239,11 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 reply_markup=InlineKeyboardMarkup(buttons)
             )
         except:
-            try:
-                await query.message.edit_text(
-                    text=START_MSG,
-                    reply_markup=InlineKeyboardMarkup(buttons),
-                    parse_mode=ParseMode.HTML
-                )
-            except:
-                pass
+            await query.message.edit_text(
+                text=START_MSG,
+                reply_markup=InlineKeyboardMarkup(buttons),
+                parse_mode=ParseMode.HTML
+            )
 
 # ========================= SPAM MONITOR ========================= #
 @Client.on_message(filters.private)
