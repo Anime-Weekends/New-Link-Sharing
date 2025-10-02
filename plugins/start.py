@@ -1,6 +1,7 @@
 import asyncio
 import base64
 from datetime import datetime, timedelta
+from pyrogram import Client, filters
 from pyrogram.enums import ParseMode, ChatMemberStatus
 from pyrogram.types import (
     Message,
@@ -11,7 +12,6 @@ from pyrogram.types import (
 )
 
 from config import *
-from bot import Bot
 from database.database import (
     add_user,
     get_channel_by_encoded_link,
@@ -23,7 +23,6 @@ from database.database import (
 )
 from plugins.newpost import revoke_invite_after_5_minutes
 from helper_func import *
-from bot import Bot  # <-- import your Bot class
 
 # ========================= GLOBALS ========================= #
 user_message_count = {}
@@ -35,8 +34,8 @@ TIME_WINDOW = timedelta(seconds=10)
 BAN_DURATION = timedelta(hours=1)
 
 # ========================= START COMMAND ========================= #
-@Bot.on_message(filters.command("start") & filters.private)
-async def start_command(client: Bot, message: Message):
+@Client.on_message(filters.command("start") & filters.private)
+async def start_command(client: Client, message: Message):
     user_id = message.from_user.id
     now = datetime.now()
 
@@ -179,8 +178,8 @@ async def start_command(client: Bot, message: Message):
             )
 
 # ========================= CALLBACK HANDLER ========================= #
-@Bot.on_callback_query()
-async def cb_handler(client: Bot, query: CallbackQuery):
+@Client.on_callback_query()
+async def cb_handler(client: Client, query: CallbackQuery):
     data = query.data
 
     if data == "close":
@@ -247,8 +246,8 @@ async def cb_handler(client: Bot, query: CallbackQuery):
             )
 
 # ========================= SPAM MONITOR ========================= #
-@Bot.on_message(filters.private)
-async def monitor_messages(client: Bot, message: Message):
+@Client.on_message(filters.private)
+async def monitor_messages(client: Client, message: Message):
     user_id = message.from_user.id
     now = datetime.now()
 
