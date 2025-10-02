@@ -1,4 +1,4 @@
-# +++ Modified By Yato [telegram username: @i_killed_my_clan & @ProYato] +++ # aNDI BANDI SANDI JISNE BHI CREDIT HATAYA USKI BANDI RAndi 
+
 import motor.motor_asyncio
 import base64
 from config import DB_URI, DB_NAME
@@ -295,6 +295,29 @@ async def get_fsub_channels() -> List[int]:
     except Exception as e:
         print(f"Error fetching FSub channels: {e}")
         return []
+
+async def get_channel_mode(channel_id: int) -> str:
+    """Return 'on' or 'off' for force-sub mode of a channel"""
+    channel = await fsub_channels_collection.find_one({"channel_id": channel_id})
+    if channel:
+        return channel.get("mode", "off")
+    return "off"
+
+async def set_channel_mode(channel_id: int, mode: str) -> bool:
+    """Set force-sub mode ('on'/'off') for a channel"""
+    if mode not in ["on", "off"]:
+        mode = "off"
+    await fsub_channels_collection.update_one(
+        {"channel_id": channel_id},
+        {"$set": {"mode": mode}},
+        upsert=True
+    )
+    return True
+
+async def show_channels() -> List[int]:
+    """Return list of all fsub channel IDs"""
+    channels = await fsub_channels_collection.find().to_list(None)
+    return [ch["channel_id"] for ch in channels if "channel_id" in ch]
 
 async def get_original_link(channel_id: int) -> Optional[str]:
     """Get the original link stored for a channel (used by /genlink)."""
