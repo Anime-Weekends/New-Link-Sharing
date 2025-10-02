@@ -177,6 +177,7 @@ async def start_command(client: Client, message: Message):
                 parse_mode=ParseMode.HTML
             )
 
+
 # ========================= CALLBACK HANDLER ========================= #
 @Client.on_callback_query()
 async def cb_handler(client: Client, query: CallbackQuery):
